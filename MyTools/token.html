@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>K8S token</title>
+</head>
+<body>
+<span id="token" onclick="selectText('token')">eyJhbGciOiJSUzI1NiIsImtpZCI6IlFjdmd6MnRMWVNlWXh3OURqb1hqRnRBNjZ3LVA5dW5XNnhYLXhBQk4wYW8ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJrdWJlZGFzaC1hZG1pbi10b2tlbi1qZzRiZiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJrdWJlZGFzaC1hZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjlmYmQwY2FkLTU2ZmItNDY3Ny1hOGMyLTdlZDk3M2VlZjdjYiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTprdWJlZGFzaC1hZG1pbiJ9.JzXcTNmDP5ZvZTLlYTwIt0jKtCdznH3FaEp1-U48P5wWyqC0r7jdFY2Z_V-yokUrleY46jWGhZDaYvfDO-BNkZchHpdd2obGDkehzaaRBHWAnXUp3f4TN0JHfotH8ZdBhfnIf5vWuXiyMR24FwM2MCy8sIzZnNQA5_gE_iK7Fu968zRORU94xQ34sigMUZTfautI-FVQI824yz7WVYdTdt2rUIxFePchZ2m2j-w2ww6GoI8cxGJi7wc21voQlIR4NJoF9CI8hyKo-OhISb9E5aH4CCDhaUCUttiu0JZHnFaelfRkNYDHfYxzbFbYbgu_UAEqqHkBb9hgzr-QhXxuGg</span>
+
+<script>
+function selectText(token) {
+    if (document.selection) { // IE
+        var range = document.body.createTextRange();
+        range.moveToElementText(document.getElementById(token));
+        range.select();
+    } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById(token));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+		document.execCommand('copy') 
+    }
+}
+</script>
+</body>
+</html>

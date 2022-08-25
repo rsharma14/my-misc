@@ -1,0 +1,8 @@
+Eclipse==C:\Users\ac49999\Rajendra\1.ADE\1.ADE\sts-4.6.1.RELEASE\SpringToolSuite4.exe==true
+VS Code==C:\Users\ac49999\AppData\Local\Programs\Microsoft VS Code\Code.exe==true
+Notepad++==C:\Program Files\Notepad++\notepad++.exe==true
+Chrome==C:\Program Files (x86)\Google\Chrome\Application\chrome.exe==true
+Firefox==C:\Program Files\Mozilla Firefox\firefox.exe==true
+OUTLOOK==C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE==true
+MSTeams==C:\Users\ac49999\AppData\Local\Microsoft\Teams\current\Teams.exe==true
+Folder==explorer.exe,C:\\Users\\ac49999\\Rajendra==true
