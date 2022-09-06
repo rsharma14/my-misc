@@ -1,5 +1,7 @@
 Eclipse==C:\Users\ac49999\Rajendra\1.ADE\1.ADE\sts-4.6.1.RELEASE\SpringToolSuite4.exe==true
+Intellij==C:\Users\ac49999\Rajendra\1.ADE\1.ADE\Intellij.2020.2.4\bin\idea64.exe==true
 VS Code==C:\Users\ac49999\AppData\Local\Programs\Microsoft VS Code\Code.exe==true
+Robo MongoDB==C:\Users\ac49999\Rajendra\2.Software\robo3t-1.4.4==false
 Notepad++==C:\Program Files\Notepad++\notepad++.exe==true
 Chrome==C:\Program Files (x86)\Google\Chrome\Application\chrome.exe==true
 Firefox==C:\Program Files\Mozilla Firefox\firefox.exe==true
