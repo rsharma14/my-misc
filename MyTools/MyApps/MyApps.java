@@ -1,42 +1,22 @@
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-
 public class MyApps {
 
 	private ClassLoader classLoader = this.getClass().getClassLoader();
 
 	private List<MyPojo> tools = readFile("apps.txt");
-	// Arrays.asList(
-//			new MyPojo("Eclipse",String.valueOf("C:\\Users\\ac49999\\Rajendra\\1.ADE\\1\\workspaceSTS\\Test\\src\\SpringToolSuite4.exe.lnk"), true)
-	// ,new MyPojo("VS Code",
-	// "C:\\Users\\ac49999\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
-	// true)
-	// ,new MyPojo("Notepad++", "C:\\Program Files\\Notepad++\\notepad++.exe", true)
-	// ,new MyPojo("Chrome", "C:\\Program Files
-	// (x86)\\Google\\Chrome\\Application\\chrome.exe", true)
-	// ,new MyPojo("Firefox", "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
-	// true)
-	// ,new MyPojo("OUTLOOK", "C:\\Program Files (x86)\\Microsoft
-	// Office\\root\\Office16\\OUTLOOK.EXE", true)
-	// ,new MyPojo("MS
-	// Teams","C:\\Users\\ac49999\\AppData\\Local\\Microsoft\\Teams\\Update.exe,--processStart,
-	// \"Teams.exe\"", true)
 
-	// );
 
 	List<String> selected = tools.stream().filter(a -> a.getIsDefault()).map(MyPojo::getLoc)
 			.collect(Collectors.toList());
@@ -48,16 +28,22 @@ public class MyApps {
 		label.setHorizontalAlignment(JLabel.CENTER);
 		label.setSize(400, 100);
 		label.setBounds(120, 260, 200, 30);
-		int x = 10, y = 10, iy = 30;
+		int x = 10, y = 10, iy = 50;
 		JCheckBox jcheckbox = null;
+
+		JPanel mainPanel = new JPanel(); // main panel
+		//mainPanel.setBackground(Color.white);
+		mainPanel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+		mainPanel.setBounds(1,1,370,200);
+
 
 		for (MyPojo cb : tools) {
 			jcheckbox = new JCheckBox(cb.getName());
 			jcheckbox.setName(cb.getLoc());
 			jcheckbox.setSelected(cb.getIsDefault());
-			jcheckbox.setBounds(x, y, 100, 30);
-			y += iy;
-			f.add(jcheckbox);
+			//jcheckbox.setBounds(x, y, 100, 30);
+			//y += iy;
+			mainPanel.add(jcheckbox);
 			jcheckbox.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					JCheckBox it = (JCheckBox) e.getItem();
@@ -90,10 +76,11 @@ public class MyApps {
 			}
 		});
 
+		f.add(mainPanel);
 		f.add(b);
 
 		f.setSize(400, 400);
-		f.setLayout(null);
+		f.setLayout(new BorderLayout());
 		f.setVisible(true);
 		f.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
@@ -109,8 +96,8 @@ public class MyApps {
 				Thread.sleep(1000);
 				sec -= 1000;
 			}
-			if (!disposeFrame[0])
-				b.doClick();
+			//if (!disposeFrame[0])
+			//	b.doClick();
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
