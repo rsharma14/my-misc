@@ -96,8 +96,8 @@ public class MyApps {
 				Thread.sleep(1000);
 				sec -= 1000;
 			}
-			//if (!disposeFrame[0])
-			//	b.doClick();
+			if (!disposeFrame[0])
+				b.doClick();
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
