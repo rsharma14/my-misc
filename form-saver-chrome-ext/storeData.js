@@ -9,7 +9,7 @@ function storeData() {
     formInputs = [], formInputs_ = [], idx = 0;
     let bodyNode = document.getElementsByTagName('body')[0];
     iterateChildren(bodyNode, 0);
-    localStorage.setItem('form', JSON.stringify(formInputs));
+    localStorage.setItem(location.href, JSON.stringify(formInputs));
     formInputs = [], formInputs_ = [];
     return "localStorage.getItem('form')"
 }

@@ -6,9 +6,10 @@ chrome.runtime.sendMessage({
 
 function onPopulate() {
     formInputs = [], formInputs_ = [], storedForm = '';
-    console.log(localStorage.getItem('form'));
-    if (localStorage.getItem('form')) {
-        storedForm = JSON.parse(localStorage.getItem('form'))
+    console.log(location);
+
+    if (localStorage.getItem(location.href)) {
+        storedForm = JSON.parse(localStorage.getItem(location.href))
         console.log(storedForm);
         let bodyNode = document.getElementsByTagName('body')[0];
         iterateChildren(bodyNode, 1);
@@ -33,7 +34,7 @@ function processFilling(node) {
     let attrVal = getAttrDertails(node);
     attrVal=attrVal.id?{id:attrVal.id}:attrVal;
     let fill = storedForm.find(f => JSON.stringify(f.el) === JSON.stringify(attrVal));
-
+    //TBD: compare el attr if matches >70%
     if (fill) {
         switch (fill.type.toUpperCase()) {
             case 'CHECKBOX':
