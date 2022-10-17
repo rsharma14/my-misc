@@ -1,9 +1,7 @@
 chrome.runtime.onMessage.addListener(function (request, sender) {
     if (request.action == "onPopulate") {
-        //console.log(request)
     }
     if (request.action == "storeData") {
-        //console.log(request)
     }
 });
 
@@ -20,13 +18,10 @@ async function populateData(e) {
 
     const tabId = await chrome.tabs.query({ active: true, currentWindow: true });
     chrome.scripting.executeScript({
-        files: ["jquery.min.js", "populateData.js"],
+        files: ["jquery.slim.min.js", "populateData.js"],
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
-        console.log('Tab script:');
-        console.log(results)
     }, err => {
-        console.log(err)
     });
 
 }
@@ -34,13 +29,10 @@ async function populateData(e) {
 async function storeData(e) {
     const tabId = await chrome.tabs.query({ active: true, currentWindow: true });
     chrome.scripting.executeScript({
-        files: ["jquery.min.js", "storeData.js"],
+        files: ["jquery.slim.min.js", "storeData.js"],
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
-        console.log('Tab script:');
-        console.log(results)
     }, err => {
-        console.log(err)
     });
 
 }
@@ -52,10 +44,7 @@ async function clearData() {
         func:()=>{localStorage.clear()},
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
-        console.log('Tab script:');
-        console.log(results)
     }, err => {
-        console.log(err)
     });
 
 }

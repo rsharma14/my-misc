@@ -29,7 +29,6 @@ function iterateChildren(nodes, type) {
 function processStoring(node) {
     let sw = node.getAttribute('type');
     sw = sw ? sw : node.tagName;
-    //console.log(sw);
     let el = node, type, val, valid = true;
     switch (sw.toUpperCase()) {
         case 'TEXT':

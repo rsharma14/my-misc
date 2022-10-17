@@ -6,11 +6,9 @@ chrome.runtime.sendMessage({
 
 function onPopulate() {
     formInputs = [], formInputs_ = [], storedForm = '';
-    console.log(location);
 
     if (localStorage.getItem(location.href)) {
         storedForm = JSON.parse(localStorage.getItem(location.href))
-        console.log(storedForm);
         let bodyNode = document.getElementsByTagName('body')[0];
         iterateChildren(bodyNode, 1);
     }
@@ -44,10 +42,8 @@ function processFilling(node) {
             default: $(node).val(fill.value); break;
         }
         //TBD: trigger element                
-        console.log(fill.type, fill.value);
         $(node).trigger('change');
         storedForm.splice(fill,1);
-        console.log(storedForm.length);
 
     }
 
@@ -55,7 +51,6 @@ function processFilling(node) {
 function processStoring(node) {
     let sw = node.getAttribute('type');
     sw = sw ? sw : node.tagName;
-    //console.log(sw);
     let el = node, type, val, valid = true;
     switch (sw.toUpperCase()) {
         case 'TEXT':
