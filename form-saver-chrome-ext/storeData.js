@@ -9,7 +9,7 @@ function storeData() {
     formInputs = [], formInputs_ = [], idx = 0;
     let bodyNode = document.getElementsByTagName('body')[0];
     iterateChildren(bodyNode, 0);
-    localStorage.setItem(location.href, JSON.stringify(formInputs));
+    localStorage.setItem("StoreForm_"+location.href, JSON.stringify(formInputs));
     formInputs = [], formInputs_ = [];
     return "localStorage.getItem('form')"
 }
@@ -28,7 +28,8 @@ function iterateChildren(nodes, type) {
 
 function processStoring(node) {
     let sw = node.getAttribute('type');
-    sw = sw ? sw : node.tagName;
+    let tag = node.tagName;
+    sw = sw ? sw : (tag.toUpperCase() === 'INPUT' ? 'text' : tag);
     let el = node, type, val, valid = true;
     switch (sw.toUpperCase()) {
         case 'TEXT':
@@ -40,7 +41,6 @@ function processStoring(node) {
         case 'EMAIL':
         case 'TEL':
         case 'RANGE':
-
             val = node.value;
             type = node.type;
             break;
@@ -58,7 +58,7 @@ function processStoring(node) {
         default: valid = false; break;
     }
     if (valid && !formInputs_.includes(el)) {
-        formInputs.push({ id: idx++, el: getAttrDertails(el), type: type, value: val });
+        formInputs.push({ id: el.id ? el.id : idx++, el: getAttrDertails(el), type: type, value: val });
         formInputs_.push(el);
         return el;
     }

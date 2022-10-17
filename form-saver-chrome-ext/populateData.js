@@ -5,10 +5,10 @@ chrome.runtime.sendMessage({
 });
 
 function onPopulate() {
-    formInputs = [], formInputs_ = [], storedForm = '';
+    formInputs = [], formInputs_ = [], storedForm = '',idx = 0;
 
-    if (localStorage.getItem(location.href)) {
-        storedForm = JSON.parse(localStorage.getItem(location.href))
+    if (localStorage.getItem("StoreForm_"+location.href)) {
+        storedForm = JSON.parse(localStorage.getItem("StoreForm_"+location.href))
         let bodyNode = document.getElementsByTagName('body')[0];
         iterateChildren(bodyNode, 1);
     }
@@ -29,28 +29,52 @@ function iterateChildren(nodes, type) {
     }
 }
 function processFilling(node) {
-    let attrVal = getAttrDertails(node);
-    attrVal=attrVal.id?{id:attrVal.id}:attrVal;
-    let fill = storedForm.find(f => JSON.stringify(f.el) === JSON.stringify(attrVal));
-    //TBD: compare el attr if matches >70%
+    let fill = storedForm.find(f => findElement(f, getAttrDertails(node)));
     if (fill) {
+        let trigger = true;
         switch (fill.type.toUpperCase()) {
             case 'CHECKBOX':
             case 'RADIO':
-                $(node).prop('checked', fill.value === true ? true : false);
+                $(node).prop('checked', fill.value === true ? true : trigger = false);
                 break;
-            default: $(node).val(fill.value); break;
+            default:
+                $(node).val(fill.value);
+                break;
         }
-        //TBD: trigger element                
-        $(node).trigger('change');
-        storedForm.splice(fill,1);
+        if (trigger) {
+            //jquery not worked
+            node.dispatchEvent(new Event("input"));
+            node.dispatchEvent(new Event('change'));
+        }
 
+        storedForm.splice(fill, 1);
     }
+}
+function findElement(storedEl, attrVal) {
+    if (attrVal.id === storedEl.id
+        || JSON.stringify(storedEl.el) === JSON.stringify(attrVal) //100%
+        || calPercentage(Object.keys(storedEl.el), Object.keys(attrVal)) >= 90
+        || calPercentage(Object.keys(storedEl.el), Object.keys(attrVal)) >= 80
+        || calPercentage(Object.keys(storedEl.el), Object.keys(attrVal)) >= 70
+
+    )
+        return true;
+    return false;
+}
+function calPercentage(ori, cur) {
+    const cur_ = ori.filter(obj => {
+        return cur.indexOf(obj) !== -1;
+    });
+    //TBD:need to check attr value as well
+    ori = ori.length, cur = cur_.length;
+    //console.log(cur == ori ? 100 : (Math.abs(cur - ori) / ori) * 100);
+    return (cur == ori ? 100 : (Math.abs(cur - ori) / ori) * 100);
 
 }
 function processStoring(node) {
     let sw = node.getAttribute('type');
-    sw = sw ? sw : node.tagName;
+    let tag = node.tagName;
+    sw = sw ? sw : (tag.toUpperCase() === 'INPUT' ? 'text' : tag);
     let el = node, type, val, valid = true;
     switch (sw.toUpperCase()) {
         case 'TEXT':
@@ -62,7 +86,6 @@ function processStoring(node) {
         case 'EMAIL':
         case 'TEL':
         case 'RANGE':
-
             val = node.value;
             type = node.type;
             break;
@@ -80,7 +103,7 @@ function processStoring(node) {
         default: valid = false; break;
     }
     if (valid && !formInputs_.includes(el)) {
-        formInputs.push({ el: getAttrDertails(el), type: type, value: val });
+        formInputs.push({ id: el.id ? el.id : idx++, el: getAttrDertails(el), type: type, value: val });
         formInputs_.push(el);
         return el;
     }

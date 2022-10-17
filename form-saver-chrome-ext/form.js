@@ -41,7 +41,12 @@ async function clearData() {
 
     const tabId = await chrome.tabs.query({ active: true, currentWindow: true });
     chrome.scripting.executeScript({
-        func:()=>{localStorage.clear()},
+        func: () => {
+            Object.keys(localStorage).map(a => {
+                if (a.startsWith("StoreForm_"))
+                    localStorage.removeItem(a)
+            })
+        },
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
     }, err => {
