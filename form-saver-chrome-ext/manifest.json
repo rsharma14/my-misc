@@ -2,7 +2,7 @@
   "name": "Form Saver",
   "version": "1.0",
   "manifest_version": 3,
-  "description": "No need to fill same form every time. Just fill for first time and Save form  data using this tool then fill when required. This will save time and hustle filling form.",
+  "description": "No need to fill same form every time. Fill once and Save form then fill when required. This will save time and hustle filling form.",
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon-32.png",
