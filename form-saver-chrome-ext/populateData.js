@@ -1,4 +1,4 @@
-
+//console.log('populateData')
 chrome.runtime.sendMessage({
     action: "onPopulate",
     source: onPopulate()
@@ -46,7 +46,7 @@ function processFilling(node) {
             node.dispatchEvent(new Event("input"));
             node.dispatchEvent(new Event('change'));
         }
-
+//console.log(fill);
         storedForm.splice(fill, 1);
     }
 }
@@ -67,7 +67,7 @@ function calPercentage(ori, cur) {
     });
     //TBD:need to check attr value as well
     ori = ori.length, cur = cur_.length;
-    //console.log(cur == ori ? 100 : (Math.abs(cur - ori) / ori) * 100);
+    ////console.log(cur == ori ? 100 : (Math.abs(cur - ori) / ori) * 100);
     return (cur == ori ? 100 : (Math.abs(cur - ori) / ori) * 100);
 
 }

@@ -1,4 +1,4 @@
-
+//console.log('storeData')
 chrome.runtime.sendMessage({
     action: "storeData",
     source: storeData()
@@ -10,6 +10,7 @@ function storeData() {
     let bodyNode = document.getElementsByTagName('body')[0];
     iterateChildren(bodyNode, 0);
     localStorage.setItem("StoreForm_"+location.href, JSON.stringify(formInputs));
+	//console.log(formInputs)
     formInputs = [], formInputs_ = [];
     return "localStorage.getItem('form')"
 }

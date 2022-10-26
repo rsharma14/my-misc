@@ -2,8 +2,10 @@
 //TBD:delete form gt 5 days
 chrome.runtime.onMessage.addListener(function (request, sender) {
     if (request.action == "onPopulate") {
+		//console.log("onPopulate")
     }
     if (request.action == "storeData") {
+		//console.log("storeData")
     }
 });
 
@@ -23,7 +25,11 @@ async function populateData(e) {
         files: ["jquery.slim.min.js", "populateData.js"],
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
+				//console.log(results)
+
     }, err => {
+						//console.log(err)
+
     });
 
 }
@@ -34,7 +40,11 @@ async function storeData(e) {
         files: ["jquery.slim.min.js", "storeData.js"],
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
+								//console.log(results)
+
     }, err => {
+								//console.log(err)
+
     });
 
 }
