@@ -59,7 +59,7 @@ function processStoring(node) {
         default: valid = false; break;
     }
     if (valid && !formInputs_.includes(el)) {
-        formInputs.push({ id: el.id ? el.id : idx++, el: getAttrDertails(el), type: type, value: val });
+        formInputs.push({ id: el.id ,name:el.name,placeholder:el.placeholder, type: type, value: val , el: getAttrDertails(el)});
         formInputs_.push(el);
         return el;
     }

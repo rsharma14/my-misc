@@ -5,10 +5,10 @@ chrome.runtime.sendMessage({
 });
 
 function onPopulate() {
-    formInputs = [], formInputs_ = [], storedForm = '',idx = 0;
+    formInputs = [], formInputs_ = [], storedForm = '', idx = 0;
 
-    if (localStorage.getItem("StoreForm_"+location.href)) {
-        storedForm = JSON.parse(localStorage.getItem("StoreForm_"+location.href))
+    if (localStorage.getItem("StoreForm_" + location.href)) {
+        storedForm = JSON.parse(localStorage.getItem("StoreForm_" + location.href))
         let bodyNode = document.getElementsByTagName('body')[0];
         iterateChildren(bodyNode, 1);
     }
@@ -46,13 +46,18 @@ function processFilling(node) {
             node.dispatchEvent(new Event("input"));
             node.dispatchEvent(new Event('change'));
         }
-//console.log(fill);
+        //console.log(fill);
         storedForm.splice(fill, 1);
     }
 }
 function findElement(storedEl, attrVal) {
-    if (attrVal.id === storedEl.id
-        || JSON.stringify(storedEl.el) === JSON.stringify(attrVal) //100%
+    //console.log({ storedEl, attrVal })
+    if (
+        (storedEl.id?.length > 0 && attrVal.id === storedEl.id)
+        || JSON.stringify(storedEl.el) === JSON.stringify(attrVal)
+        || (storedEl.name?.length > 0 && attrVal.name === storedEl.name)
+        || (storedEl.placeholder?.length > 0 && attrVal.placeholder === storedEl.placeholder)
+
         || calPercentage(Object.keys(storedEl.el), Object.keys(attrVal)) >= 90
         || calPercentage(Object.keys(storedEl.el), Object.keys(attrVal)) >= 80
         || calPercentage(Object.keys(storedEl.el), Object.keys(attrVal)) >= 70
