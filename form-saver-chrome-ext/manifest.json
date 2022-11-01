@@ -5,7 +5,7 @@
   "description": "Save and fill form",
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icon-32.png",
+    "default_icon": "assets/icon-32.png",
     "default_title": "Form Saver"
   },
   "icons": {

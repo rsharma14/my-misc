@@ -8,6 +8,15 @@ chrome.runtime.onMessage.addListener(function (request, sender) {
         //console.log("storeData")
     }
 });
+chrome.runtime.sendMessage({
+    action: "onExtLoad",
+    source: true
+});
+
+chrome.runtime.onInstalled.addListener(function() { 
+    console.log("I started up!");
+    chrome.storage.local.set({"startedUp": true});
+});
 
 document.getElementById('populate').addEventListener('click', function () {
     populateData();
