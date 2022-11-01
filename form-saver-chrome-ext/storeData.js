@@ -9,8 +9,8 @@ function storeData() {
     formInputs = [], formInputs_ = [], idx = 0;
     let bodyNode = document.getElementsByTagName('body')[0];
     iterateChildren(bodyNode, 0);
-    localStorage.setItem("StoreForm_"+location.href, JSON.stringify(formInputs));
-	//console.log(formInputs)
+    localStorage.setItem("StoreForm_" + location.href, JSON.stringify(formInputs));
+    //console.log(formInputs)
     formInputs = [], formInputs_ = [];
     return "localStorage.getItem('form')"
 }
@@ -59,7 +59,7 @@ function processStoring(node) {
         default: valid = false; break;
     }
     if (valid && !formInputs_.includes(el)) {
-        formInputs.push({ id: el.id ,name:el.name,placeholder:el.placeholder, type: type, value: val , el: getAttrDertails(el)});
+        formInputs.push({ id: el.id, name: el.name, placeholder: el.placeholder, type: type, value: val, el: getAttrDertails(el) });
         formInputs_.push(el);
         return el;
     }

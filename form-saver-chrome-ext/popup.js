@@ -2,10 +2,10 @@
 //TBD:delete form gt 5 days
 chrome.runtime.onMessage.addListener(function (request, sender) {
     if (request.action == "onPopulate") {
-		//console.log("onPopulate")
+        //console.log("onPopulate")
     }
     if (request.action == "storeData") {
-		//console.log("storeData")
+        //console.log("storeData")
     }
 });
 
@@ -22,13 +22,13 @@ async function populateData(e) {
 
     const tabId = await chrome.tabs.query({ active: true, currentWindow: true });
     chrome.scripting.executeScript({
-        files: ["jquery.slim.min.js", "populateData.js"],
+        files: ["assets/jquery.slim.min.js", "populateData.js"],
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
-				//console.log(results)
+        //console.log(results)
 
     }, err => {
-						//console.log(err)
+        //console.log(err)
 
     });
 
@@ -37,13 +37,13 @@ async function populateData(e) {
 async function storeData(e) {
     const tabId = await chrome.tabs.query({ active: true, currentWindow: true });
     chrome.scripting.executeScript({
-        files: ["jquery.slim.min.js", "storeData.js"],
+        files: ["storeData.js"],
         target: { tabId: tabId[0]['id'] }
     }).then(results => {
-								//console.log(results)
+        //console.log(results)
 
     }, err => {
-								//console.log(err)
+        //console.log(err)
 
     });
 
