@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)http://10.4.71.200/local/rsharma/vidLayer.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <!--<script type="text/javascript" src="myjs/Three.js"></script>-->
+  <script type="text/javascript" src="Three.js"></script>
+  <!--<script type="text/javascript" src="myjs/Projector.js"></script>-->
+  <script type="text/javascript" src="OrbitControls.js"></script>
+  <script type="text/javascript" src="Detector.js"></script>
+  <script type="text/javascript" src="BinaryLoader.js"></script>
+  <script type="text/javascript" src="Car.js"></script>
+  <script type="text/javascript" src="carwheel.js"></script>
+  <script type="text/javascript" src="config.js"></script>
+  
+  <!--script src="js/jquery.min.js"></script-->
+  <script src="jquery-1.9.0.js"></script>
+ </head>
+ <body id="" style="zoom: 1;">
+  <style type="text/css">
+
+  </style>
+  <div id="cancon" style="position:absolute;left:0px;top:0px">
+    
+  </div>
+  <div id="title" style="position:absolute;left:0px;top:0px">
+    <input type="button" value="Load Road" id="rup">
+      <input type="button" value="Rotate Down" id="rdown">
+      <input type="button" value="Alert" id="alrt">
+      <input type="button" value="Camera Forword" id="camfor">
+      <input type="button" value="Clear Route" id="camreset">
+      <input type="button" value="Add" id="add">
+      <input type="button" value="Lock Rotate" id="lockCamRor">
+      <input type="button" value="RotateUp" id="camRorL">
+  </div>
+  <div style="position:absolute;bottom:0px;left:0px;color: red;">
+  <span id="latid"></span>&nbsp;&nbsp;&nbsp;<span id="lonid"></span>
+  </div>
+    <div style="position:absolute;bottom:0px;left:500px;color: red;">
+  <span id="latid1"></span>&nbsp;&nbsp;&nbsp;<span id="lonid1"></span>
+  </div>
+  <div style="position:absolute;bottom:0px;left:800px">
+  <span id="ttime">ttime</span>
+  </div>
+  
+  <div id="VideoPlayerDiv" class="video1" style="  position: absolute;  right: 0px;  border: 20px solid #000000;  margin: 10px;">
+    <b style="text-align:center;padding:10px;">
+    <a class="maptab">Loading the Video Player....</a>
+    </b>
+    <noscript> &lt;object classid='clsid:d27cdb6e-ae6d-11cf-96b8-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0' width='480' height='350' id='VideoPlaylist' align='middle'&gt;
+    &lt;param name='allowScriptAccess' value='sameDomain' /&gt;
+    &lt;param name='allowFullScreen' value='false' /&gt;
+    &lt;param name='movie' value='VidteqPlayer/VideoPlaylist.swf' /&gt;
+    &lt;param name='quality' value='high' /&gt;
+    &lt;param name='bgcolor' value='#ffffff' /&gt;
+    &lt;embed src='VidteqPlayer/VideoPlaylist.swf' quality='high' bgcolor='#ffffff' width='480' height='320' name='VideoPlaylist' align='middle' allowScriptAccess='sameDomain' allowFullScreen='false' type='application/x-shockwave-flash' pluginspage='http://www.macromedia.com/go/getflashplayer' /&gt;
+    &lt;/object&gt; </noscript>
+  </div>
+
+
+
+  
+  <script type="text/javascript" src="tiler4.js"></script>
+  <script type="text/javascript" src="utils.js"></script>
+  <script type="text/javascript" src="vidLayer2.js"></script>
+  <script type="text/javascript" src="linearResponse.js"></script>
+  <script type="text/javascript" src="AC_RunActiveContent.js"></script>
+  <script type="text/javascript" src="vidPlayer.js"></script>
+ 
+
+</body></html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://10.4.71.200/local/rsharma/contour/contour.php -->
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script type="text/javascript" src="Three.js"></script>
+  <script type="text/javascript" src="OrbitControls.js"></script>
+  <script src="jquery.min.js"></script>
+  <script type="text/javascript" src="TerrainLoader.js"></script>
+</head>
+
+<body>
+  <div id="cancon" style="position:absolute;left:0px;top:0px">
+  
+  </div>
+  <div style="position:absolute;right:0px;top:0px;height:200px;width:200px">
+    <div>
+      Upload CSV File: <input type="file" name="file" id="file">
+      <input type="button" id="upload" value="Import CSV File">
+    </div>
+    <br><br>
+    <div>
+      Ground Cover:
+      <input type="file" id="txImg"><br><br>
+      Parameters:
+      <table id="datatable">
+        <tbody>
+          <tr>
+            <td bgcolor="red">2dImageX</td>
+            <td><input type="text" id="imgx" size="4"></td>
+          </tr>
+          <tr>
+            <td bgcolor="red">2dImageY</td>
+            <td><input type="text" id="imgy" size="4"></td>
+          </tr>
+          <tr>
+            <td bgcolor="red">3DPlaneWidth</td>
+            <td><input type="text" id="planex" size="4"></td>
+          </tr>
+          <tr>
+            <td bgcolor="red">3DPlaneHeight</td>
+            <td><input type="text" id="planey" size="4"></td>
+          </tr>
+          <tr>
+            <td bgcolor="red">XScale</td>
+            <td><input type="text" id="xscale" size="4"></td>
+          </tr>
+          <tr>
+            <td bgcolor="red">YScale</td>
+            <td><input type="text" id="yscale" size="4"></td>
+          </tr>
+          <tr>
+            <td bgcolor="red">ZScale/Altitude</td>
+            <td><input type="text" id="zscale" size="4"></td>
+          </tr>
+          <tr>
+            <td bgcolor="red">Light Intensity</td>
+            <td><input type="text" id="lintense" size="4"></td>
+          </tr>
+
+          <tr>
+            <td colspan="2" align="center"><input type="button" value="Update" id="update"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <br><br>
+    <div align="center">
+      Sun Position:
+      <table id="ctable">
+        <tbody>
+          <tr>
+            <td></td>
+            <td><button id="rotateu">U</button></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><button id="rotateb">B</button></td>
+            <td></td>
+            <td><button id="rotatef">F</button></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><button id="rotated">D</button></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><button id="sunnear">+</button></td>
+            <td><button id="sunfar">-</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div><input type="checkbox" name="axisref" value="axisRef" id="aref">Check for Axis Reference</div><br><br>
+    <button id="snapshot">SnapShot</button>
+  </div>
+  <script type="text/javascript" src="contour.js"></script>
+
+
+</body>
+
+</html>

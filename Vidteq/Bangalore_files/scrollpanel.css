@@ -1,0 +1,355 @@
+.landMarkPopupText {
+ font-size:12px;
+  text-decoration:none;
+  color:#ff6600;
+  white-space:wrap;
+  font-weight: bold;
+  font-family:helvetica,arial,clean,sans-serif;
+}
+#scrolltabv {
+  position:absolute;
+  float:right;
+  top:40%;
+  right:30px;
+  width: 30px;
+  height: 126px;
+  border:1px;
+  border-color:black;
+  margin:0px;
+  background:transparent;
+  padding: 0px; 
+  text-decoration: none;
+  z-index:7000;
+}
+#scrolltabv_title {
+  position:absolute;
+  float:right;
+  top:42%;
+  right:65px;
+  width: 120px;
+  height: 86px;
+  border:0px;
+  margin:0px;
+
+  padding: 0px; 
+  text-decoration: none;
+  z-index:7000;
+  display:none;
+}
+#scrolltabv_title_lbg {
+  position:absolute;
+  top:0px;
+  right:9px;
+  width:120px;
+  height:22px;
+  background-image: url("../images/category_lbg.png");  
+  background-position:left;
+  background-repeat:no-repeat;
+}
+#scrolltabv_title_rbg {
+  position:absolute;
+  top:0px;
+  right:0px;
+  width: 30px;
+  height:22px;
+  background-image: url("../images/category_rbg.png");  
+  background-position:right;
+  background-repeat:no-repeat;
+}
+#scrolltabv_title_inside_text {
+  position:absolute;
+  top:0px;
+  right:9px;
+  width:120px;
+  height:22px;
+  padding-top:4px;
+  text-align:right;
+  
+}
+a.scrolltabv_title_inside_text_a {
+  font-size:12px;
+  text-decoration:none;
+  color:#ff6600;
+  white-space:nowrap;
+  font-weight: bold;
+  font-family:helvetica,arial,clean,sans-serif;
+}
+
+.cat_button {
+  font-size:10px;
+  text-decoration:none;
+  color:#000000;
+  font-family:helvetica,arial,clean,sans-serif;
+  text-align:left;
+} 
+
+#scrolltabh_title {
+  position:absolute;
+  float:right;
+  top:325px;
+  right:36px;
+  width: 120px;
+  height: 80px;
+  border-color:black;
+  border:0px;
+  margin:0px;
+  background:transparent;
+  padding: 0px; 
+  text-decoration: none;
+  z-index:7000;
+  display:none;
+}
+#scrolltabh_title_lbg {
+  position:absolute;
+  top:0px;
+  right:9px;
+  width:200px;
+  height:50px;
+  background-image: url("../images/category_lbgh.png");  
+  background-position:left;
+  background-repeat:no-repeat;
+}
+#scrolltabh_title_rbg {
+  position:absolute;
+  top:0px;
+  right:0px;
+  width: 30px;
+  height:50px;
+  background-image: url("../images/category_rbgh.png");  
+  background-position:right;
+  background-repeat:no-repeat;
+}
+#scrolltabh_title_inside_text {
+  position:absolute;
+  top:0px;
+  right:16px;
+  height:50px;
+  padding-top:25px;
+  text-align:right;
+  
+}
+
+#buttonup{
+  width:30px;
+  height:20px;
+  cursor:pointer;
+  top:0px;
+  right:0px;
+  background:transparent;
+  background-image: url("../images/top.png");  
+  padding: 0px; 
+  text-decoration: none;
+  position:absolute;  
+  z-index:10000;
+}
+#buttonup:hover{
+  background-image: url("../images/top_a.png");  
+}
+#buttonup:active{
+  background-image: url("../images/top_a.png");  
+}
+#button_zcat{
+  position:absolute;  
+  width:30px;
+  height:26px;
+  cursor:pointer;
+  top:132px;
+  right:0px;
+  padding: 0px; 
+  text-decoration: none;
+  z-index:10000;
+}
+#button_zcat:hover{
+  background:transparent;
+}
+#button_zcat:active{
+  background:transparent;
+}
+#containera{
+  position:absolute;
+  width:30px;
+  height:86px;
+  top:20px;
+  left:0px;
+  background-color:#ffffff;
+  background-image: url("../images/middle-pannel.png");  
+   
+}
+#containerb{
+  position:absolute;  
+  width:30px;
+  height:86px;
+  top:20px;
+  left:0px;
+  background-color:#ffffff;
+  background-image: url("../images/middle-pannel.png");  
+  
+}
+#buttondown{
+  width:30px;
+  height:20px;
+  top:106px;
+  right:0px;
+  cursor:pointer;
+  background:transparent;
+  background-image: url(../images/down.png);  
+  position:absolute;  
+  padding: 0px; 
+  text-decoration: none;
+  z-index:10000;
+}
+#buttondown:hover{
+  background-image: url(../images/down_a.png);  
+}
+#buttondown:active{
+  background-image: url(../images/down_a.png);  
+}
+
+.cat_button_top{
+  width: 26px;
+  height: 26px;
+  left:2px;
+  top:2px;
+  background-color:#ffffff;
+  border:0px;
+  color:#124323;
+  position:absolute;  
+  margin:0px;padding: 0px; 
+  text-decoration: none;
+}
+.cat_button_top:hover{
+  background-color:#0066cc;
+}
+.cat_button_top:active{
+  background-color:#0066cc;
+}
+.cat_button_middle{
+  width: 26px;
+  height: 26px;
+  margin-top:2px;
+  left:2px;
+  top:30px;
+  background-color:#ffffff;
+  border:0px;
+  color:#124323;
+  position: absolute;
+  margin:0px;padding: 0px; 
+  text-decoration: none;
+}
+.cat_button_middle:hover{
+  background-color:#0066cc;
+}
+.cat_button_middle:active{
+  background-color:#0066cc;
+}
+
+.cat_button_down{
+  width: 26px;
+  height: 26px;
+  left : 2px;
+  top:58px;
+  background-color:#ffffff;
+  border:0px;
+  color:#124323;
+  position: absolute;
+  margin:0px;padding: 0px; 
+  text-decoration: none;
+}
+.cat_button_down:hover{
+  background-color:#0066cc;
+}
+.cat_button_down:active{
+  background-color:#0066cc;
+}
+
+.cat_popup_width_moz{
+  width:300px;
+}
+.cat_popup_width_ie{
+  width:290px;
+}
+
+#scrolltabh {
+  position:absolute;
+  float:right;
+  top:270px;
+  right:36px;
+  width: 574px;
+  height: 40px;
+  border:1px;
+  border-color:black;
+  margin:0px;
+  background:transparent;
+  padding: 0px; 
+  text-decoration: none;
+  z-index:7000;
+}
+.containers{
+  width:534px;
+  height:40px;
+  top:0px;
+  /*right:20px;*/
+  background:white;
+  padding: 0px;
+  text-decoration:none;
+  position:absolute;
+  left:0;
+  display:none;
+
+}
+.insideContainer {
+  width:534px;
+  height:40px;
+  top:0px;
+  right:20px;
+  background:white;
+  padding: 0px;
+  text-decoration:none;
+  position:absolute;
+  /*display:none;*/
+}
+#buttonL{
+  width:20px;
+  height:40px;
+  cursor:pointer;
+  top:0px;
+  left:0px;
+  background-color:transparent; 
+  /*background-image: url("../images/top.png");*/  
+  padding: 0px; 
+  text-decoration: none;
+  position:absolute;  
+}
+
+#buttonR{
+  width:20px;
+  height:40px;
+  cursor:pointer;
+  top:0px;
+  right:0px;
+  background-color:transparent; 
+  /*background-image: url("/hand_crafted/logos/category_logos/category_panel_images/category_panel_images_a/Sprit_Image_1.png") 0px 0px;*/  
+  padding: 0px; 
+  text-decoration: none;
+  position:absolute;  
+}
+
+.cat_buttonh {
+  width:64px;
+  height:32px;
+  top:4px;
+  right:0px;
+  left:auto;
+  background-color:white;
+  padding: 0px;
+  text-decoration:none;
+  position:absolute;
+}
+/*.cat_buttonh:hover {
+  background-color:#ff6600;
+}
+
+.cat_buttonh:active {
+  background-color:#ff6600;
+}
+*/

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)http://10.4.71.200/local/rsharma/satimg/satimg.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">.gm-style .gm-style-mtc label,.gm-style .gm-style-mtc div{font-weight:400}</style><link type="text/css" rel="stylesheet" href="css"><style type="text/css">.gm-style .gm-style-cc span,.gm-style .gm-style-cc a,.gm-style .gm-style-mtc div{font-size:10px}</style><style type="text/css">@media print {  .gm-style .gmnoprint, .gmnoprint {    display:none  }}@media screen {  .gm-style .gmnoscreen, .gmnoscreen {    display:none  }}</style><style type="text/css">.gm-style{font-family:Roboto,Arial,sans-serif;font-size:11px;font-weight:400;text-decoration:none}.gm-style img{max-width:none}</style>
+<style>
+.gmnoprint a, .gmnoprint span {
+    display:none;
+}
+.gm-style-cc a, .gm-style-cc div {
+    display:none;
+}
+.gm-style div a div img{
+    display:none;
+}
+.gmnoprint div {
+    background:none !important;
+}
+
+</style>
+<script src="js"></script>
+<script src="jquery.min.js"></script>
+<script src="html2canvas.js"></script>
+<script src="canvas2image.js"></script>
+
+<script>
+  if(typeof (vidteq)=='undefined'){vidteq={};}
+  vidteq._satimg=function(){
+    this.map=null;
+    this.overlay=null,width=0,height=0;
+    this.fl=0,fl2=0;
+    this.LatLngC={};
+    this.rowC=0,this.colC=0,this.row=0,this.col=0;
+    this.ll=null;
+    var flag=true;
+    this.store=null,this.storeC=null;
+    this.labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    this.labelIndex = 0;
+    this.allImages=[];  
+  }
+  
+  vidteq._satimg.prototype.initialize=function () {
+    var mapOptions = {
+      zoom: 17,
+      center: new google.maps.LatLng(13.00796174 , 77.715706360),
+      //mapTypeId: google.maps.MapTypeId.ROADMAP,
+      mapTypeId: google.maps.MapTypeId.SATELLITE,
+      rotateControl:true
+      ,overviewMapControl:true
+      ,zoomControl:false
+      ,streetViewControl:false
+      ,mapTypeControl:true
+    };
+    var map=this.map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+     //var map1 = new google.maps.MapOptions(document.getElementById('map_canvas'),
+    //mapOptions
+    //);
+    console.log(google.maps);  
+    google.maps.event.addListener(map, 'mousemove', function(event) {
+      $('#latMap').val(event.latLng.lat());
+      $('#lngMap').val(event.latLng.lng());
+    });
+    map.addListener('mousemove', function(event) {    });
+    var that=this;
+    map.addListener('idle', function(event) {   
+      var marker = new google.maps.Marker({
+      position: map.getCenter(),
+      label: that.labels[that.labelIndex++ % that.labels.length],
+      map: map
+    });
+    });
+    var t=map.getCenter();
+    var LatLngC={lat:t.lat(),lng:t.lng()};
+    console.log(LatLngC);
+    this.initEvents();
+    //store=map.getBounds();console.log(store);alert()
+  }
+  
+  
+  vidteq._satimg.prototype.initEvents=function (){
+    var that=this;
+    $(document).ready(function(){
+    $("#north").click(function(){
+      that.goToNorth();
+    });
+    $("#south").click(function(){
+      that.goToSouth();
+    });
+    $("#east").click(function(){
+      that.goToEast();
+    });
+    $("#west").click(function(){
+      that.goToWest();
+    });
+    $("#capture").click(function() { 
+      that.captureImage();
+    });
+    //});
+    $("#next").click(function(){
+      that.goToNext();
+    });
+    
+    $("#start").click(function(){
+      $("#rcount").text(++that.rowC);
+      $("#ccount").text(++that.colC);
+      $("#ccount").css({"color":"green"});
+      var info=that.getCurrentLatLng();
+      that.putLatLng();
+      that.store=$.extend(true,{},that.map.getBounds());
+      that.storeC=$.extend(true,{},that.map.getCenter());
+      console.log(that.store);
+      that.getFirstImage();     
+    });
+    $("#bound").click(function(){
+      var ll=that.map.getBounds();
+      var bound={
+      ll:{lat:ll.N.N,lng:ll.j.j},
+      ur:{lat:ll.N.j,lng:ll.j.N}
+      }
+      console.log(bound);
+      var cord=bound.ur.lat+" "+bound.ll.lng+"|";
+      cord+=bound.ll.lat+" "+bound.ll.lng+"|";
+      cord+=bound.ll.lat+" "+bound.ur.lng+"|";
+      cord+=bound.ur.lat+" "+bound.ur.lng+"|";
+      console.log(cord);
+      if(that.allImages && that.allImages.length==0){
+        alert("No images to save");
+        return;
+      }
+      else{
+        that.uploadSeries(that.allImages,function(){alert("Done!");});
+      }
+    });
+    $("#go").click(function(){
+      console.log();
+      var ctrlat=parseFloat($("#latMap").val());
+      var ctrlng=parseFloat($("#lngMap").val());
+      var LatLngC={lat:ctrlat,lng:ctrlng};
+      console.log(LatLngC);
+      that.map.panTo(LatLngC);
+      console.log(that.map.getBounds());
+    });  
+    $("#go1").click(function(){
+      var ll=that.map.getBounds();
+      var bound={
+      ll:{lat:ll.N.N,lng:ll.j.j},
+      ur:{lat:ll.N.j,lng:ll.j.N}
+      }
+      console.log(bound);
+      
+      var r=bound.ur.lat-bound.ll.lat;
+      
+      var c=bound.ur.lng-bound.ll.lng;
+      console.log(r+"="+c);
+        
+      var bbox={
+       ll:{
+         lat:parseFloat($("#lllat").val())
+        ,lon:parseFloat($("#lllon").val())
+        },
+       ur:{
+         lat:parseFloat($("#urlat").val())
+        ,lon:parseFloat($("#urlon").val())
+        }
+     }
+     console.log(bbox);
+     var t1=bbox.ur.lat-bbox.ll.lat;
+     var t2=bbox.ur.lon-bbox.ll.lon;
+     console.log(t1+"=="+t2);
+     that.row=parseInt(t1/r+0.5)+2;
+     that.col=parseInt(t2/c+0.5)+2;
+     console.log(that.row+"=="+that.col);
+     $("#rowval").val(that.row);
+     $("#colval").val(that.col);
+     var LatLngC={lat:bbox.ur.lat,lng:bbox.ll.lon};
+     that.map.panTo(LatLngC);
+      console.log(LatLngC);
+    });
+    
+    $("#help").click(function(){
+      var str="";
+      str+=" 1. input lower left lat-lon in 'll lat' & 'll lon'\n";
+      str+=" 2. input upper right lat-lon in 'ur lat' & 'ur lon'\n";
+      str+=" 3. Select zoom level dbLclk(zin)/dbRclk(zout)'\n";
+      str+=" 4. click Go (select zoom level b4 Go default is 17 , max is 19).\n";
+      str+=" 5. click Start.\n";
+      str+=" 6. Before save delete all the images from the directory.\n";
+      str+=" 7. Click Save Img to save images.\n";
+      str+=" 8. Images saved in /home/mapdata/rsharma/software/tmp/satimg/tmp.\n";
+      str+=" 9.Auto merging is pending(now .bat file is used to bind).\n";
+      str+=" NB:Sometime google changes its object name(line getBounds():N.O etc.) in google api rename it\n";
+      str+=" 10.(local system)http://localhost/HomePHP/satimg/satimg.php\n";
+      alert(str);
+    });
+
+  });
+  
+  }
+  vidteq._satimg.prototype.goToEast=function (){
+    console.log("goToEast");
+    var info=this.getCurrentLatLng();
+    var latdif=info.bound.ne.lat-info.bound.sw.lat;
+    var lngdif=info.bound.ne.lng-info.bound.sw.lng;
+    var ctrlat=info.center.lat;
+    var ctrlng=info.center.lng;
+    var LatLngC={lat:ctrlat,lng:ctrlng+lngdif};
+    this.map.panTo(LatLngC);
+    
+    this.putLatLng();
+    //this.colC++;
+    $("#ccount").text(++this.colC);
+    $("#ccount").css({"color":"green"});
+    //$("#ccount").text(1);
+  }
+  vidteq._satimg.prototype.goToWest=function (){
+    var info=this.getCurrentLatLng();
+    var latdif=info.bound.ne.lat-info.bound.sw.lat;
+    var lngdif=info.bound.ne.lng-info.bound.sw.lng;
+    var ctrlat=info.center.lat;
+    var ctrlng=info.center.lng;
+    var LatLngC={lat:ctrlat,lng:ctrlng-lngdif};
+    this.map.panTo(LatLngC);
+    
+    this.putLatLng();
+    //$("#rcount").text(++rowC);
+    //$("#ccount").text(1);  
+  }
+  vidteq._satimg.prototype.goToNorth=function (){
+    var info=this.getCurrentLatLng();
+    var latdif=info.bound.ne.lat-info.bound.sw.lat;
+    var lngdif=info.bound.ne.lng-info.bound.sw.lng;
+    var ctrlat=info.center.lat;
+    var ctrlng=info.center.lng;
+    var LatLngC={lat:ctrlat+latdif,lng:ctrlng};
+    console.log(LatLngC);
+    this.map.panTo(LatLngC);
+    
+    this.putLatLng();  
+  }
+  vidteq._satimg.prototype.goToSouth=function (){
+    var info=this.getCurrentLatLng();
+    var latdif=info.bound.ne.lat-info.bound.sw.lat;
+    var lngdif=info.bound.ne.lng-info.bound.sw.lng;
+    var ctrlat=info.center.lat;
+    var ctrlng=info.center.lng;
+    var LatLngC={lat:ctrlat-latdif,lng:ctrlng};
+    console.log(LatLngC);
+    this.map.panTo(LatLngC);
+    
+    this.putLatLng();
+  }
+  vidteq._satimg.prototype.goToNext=function (){
+    console.log("goToNext")
+    var ll=this.store;
+    if(ll==null){alert("Click start button at the begining!");return;}
+    var sw={lat:ll.N.N,lng:ll.j.j};
+    var ne={lat:ll.N.j,lng:ll.j.N};
+    var ctrlat=this.storeC.lat();
+    var ctrlng=this.storeC.lng();
+    var latdif=ne.lat-sw.lat;
+    var lngdif=ne.lng-sw.lng;
+    console.log(sw);console.log(ne);
+    var LatLngC={lat:ctrlat-latdif,lng:ctrlng};
+    //console.log(LatLngC);
+    this.map.panTo(LatLngC);
+    var info=this.getCurrentLatLng();
+    this.putLatLng();
+    
+    this.store=$.extend(true,{},this.map.getBounds());
+    this.storeC=$.extend(true,{},this.map.getCenter());
+    this.colC=0
+    $("#ccount").text(++this.colC);
+    $("#rcount").text(++this.rowC);
+  }
+  
+  vidteq._satimg.prototype.captureImage=function (){
+    //ll=map.getBounds();
+    //var bound={
+    //ll:{lat:ll.N.N,lng:ll.j.j},
+    //ur:{lat:ll.N.j,lng:ll.j.N}
+    //}
+    //console.log(bound);
+    //var cord=bound.ur.lat+" "+bound.ll.lng+"|";
+    //cord+=bound.ll.lat+" "+bound.ll.lng+"|";
+    //cord+=bound.ll.lat+" "+bound.ur.lng+"|";
+    //cord+=bound.ur.lat+" "+bound.ur.lng+"|";
+    //console.log(cord);  
+    //------------------------------
+    html2canvas($("#pdiv"), {
+      useCORS: true,
+      //allowTaint:true,
+      onrendered: function(canvas) {
+         theCanvas = canvas;
+         document.getElementById("stack").appendChild(canvas);
+         console.log(canvas.toDataURL());
+         //Convert and download as image 
+         Canvas2Image.saveAsPNG(canvas); 
+         $("#img-out").append(canvas);
+         ////Clean up 
+         //document.body.removeChild(canvas);
+            }
+        });
+    $("#ccount").css({"color":"red"});
+  }
+  vidteq._satimg.prototype.getFirstImage=function (){
+    this.row=parseInt($('#rowval').val()); 
+    this.col=parseInt($('#colval').val()); 
+    console.log(this.row+"=="+this.col);
+    var that=this;
+    var transform=$(".gm-style>div:first>div").css("transform")
+    var comp=transform.split(",") //split up the transform matrix
+    var mapleft=parseFloat(comp[4]) //get left value
+    var maptop=parseFloat(comp[5])  //get top value
+    $(".gm-style>div:first>div").css({ //get the map container. not sure if stable
+      "transform":"none",
+      "left":mapleft,
+      "top":maptop,
+    })
+    
+      html2canvas($('#pdiv'),
+    {
+      useCORS: true,
+      //allowTaint:true,
+      onrendered: function(canvas)
+      {
+        var dataUrl= canvas.toDataURL('image/png');
+        $("#stack").attr("src",dataUrl);
+        //Canvas2Image.saveAsPNG(canvas);
+        that.allImages.push(dataUrl);
+        that.getImage(that.map);
+        console.log(dataUrl);
+        if(that.col>=1){  that.goToEast(); }
+        //location.href=dataUrl //for testing I never get window.open to work
+      //  $("#stack").attr("src",dataUrl);
+      //  $(".gm-style>div:first>div").css({
+      //    left:0,
+      //    top:0,
+      //    "transform":transform
+      //  })
+      }
+    });
+  }
+  vidteq._satimg.prototype.getImage=function (map){
+    console.log("getImage");
+    var that=this;
+    this.map.addListener('tilesloaded', function(){
+      console.log("tilesloaded::"+that.row+":"+that.col);
+  
+    //=========
+    var transform=$(".gm-style>div:first>div").css("transform")
+    var comp=transform.split(",") //split up the transform matrix
+    var mapleft=parseFloat(comp[4]) //get left value
+    var maptop=parseFloat(comp[5])  //get top value
+    $(".gm-style>div:first>div").css({ //get the map container. not sure if stable
+      "transform":"none",
+      "left":mapleft,
+      "top":maptop,
+    })
+    html2canvas($('#pdiv'),
+    {
+      useCORS: true,
+      //allowTaint:true,
+      onrendered: function(canvas)
+      {
+        var dataUrl= canvas.toDataURL('image/png');
+        $("#stack").attr("src",dataUrl);
+        //Canvas2Image.saveAsPNG(canvas);
+        that.allImages.push(dataUrl);
+        console.log("allImages="+that.allImages.length);
+        //location.href=dataUrl //for testing I never get window.open to work
+      //  $("#stack").attr("src",dataUrl);
+      //  $(".gm-style>div:first>div").css({
+      //    left:0,
+      //    top:0,
+      //    "transform":transform
+      //  })
+          //============
+       if(that.rowC==that.row && that.colC==that.col){
+         alert("All images Captured");
+         return;
+       }
+       if(that.rowC!=that.row && that.colC==that.col){
+          that.goToNext();
+          that.colC=1;
+          console.log("goToNext")
+        }
+        else{ that.goToEast(); }
+        
+        console.log(that.rowC);
+        console.log(that.colC);
+        console.log(that.allImages.length);
+    }
+  });
+  
+  });
+  }
+  //================================================================
+  vidteq._satimg.prototype.uploadSeries = function(uploadList,callback) {
+    console.log("uploadSeries",uploadList);
+    var lnt=(uploadList.length-1+"").length;
+    if (!uploadList.length) { 
+      callback(); 
+      return; 
+    }
+    var that = this;
+    var callbackInner = function (idx) {
+      idx++;
+      console.log("uploadSeries",idx);
+      if (uploadList[idx]) {
+       that.uploadOne(uploadList,idx,lnt,callbackInner);
+      } else {
+        callback();        
+      }
+    };
+  this.uploadOne(uploadList,0,lnt,callbackInner);
+  }
+  
+  vidteq._satimg.prototype.uploadOne = function(uploadList,idx,lnt,callback) {
+    var one = uploadList[idx]; 
+    console.log("uploading ... ");console.log(one);
+  this.storeTabAjaxCall(one,idx,lnt,function () {
+      //one.res = res;
+      callback(idx);
+    });
+  }
+  
+  vidteq._satimg.prototype.storeTabAjaxCall = function(one,idx,lnt,callback) {
+    console.log("AJAX",one);
+    console.log("AJAX",idx);
+    //==================
+    var pre="";
+    if(lnt==1){}
+    else if(lnt==2){
+      if(idx<10){pre="0";}      
+    }
+    else if(lnt==3){
+      if(idx>=0 && idx<10){pre="00";}
+      else if(idx>=10 && idx<100){pre="0";}
+      
+    }
+    //==================
+    $.ajax({
+      url:"img.php"
+      ,type:"POST"
+      ,data:{img:one,idx:idx,prefix:pre}    
+      ,success:function(data){
+        console.log("success",data);
+        callback();
+      }
+      ,error:function(data){
+        console.log("error",data);
+      }
+    });
+  }
+  
+  //================================================================
+  vidteq._satimg.prototype.putLatLng=function (){
+  var ll=this.map.getBounds();
+  var sw={lat:ll.N.N,lng:ll.j.j};
+  var ne={lat:ll.N.j,lng:ll.j.N};
+  var ctrlat=this.map.getCenter().lat();
+  var ctrlng=this.map.getCenter().lng();
+    
+  var tl=$("#map_canvas").position();
+  var wd=$("#map_canvas").width();
+  var ht=$("#map_canvas").height();
+  var br={x:wd+tl.left,y:ht+tl.top};
+  //console.log(tl);
+  //console.log(br);
+   $("#l1").empty();$("#l2").empty();$("#l3").empty();$("#l4").empty();$("#l5").empty();
+  $("#l1").css({"color":"red","font-weight":"bold","top":(tl.top+10)+"px","left": tl.left+"px"});
+  $("#l2").css({"color":"red","font-weight":"bold","bottom":tl.top+"px","left": tl.left+"px"});
+  $("#l3").css({"color":"red","font-weight":"bold","bottom":tl.top+"px","right": tl.left+"px"});
+  $("#l4").css({"color":"red","font-weight":"bold","top":tl.top+"px","right": tl.left+"px"});
+  $("#l5").css({"color":"red","font-weight":"bold","top":(ht/2)+"px","right": (wd/2)+"px"});
+  $("#mark").attr("src","mark.png");
+  $("#mark").css({"top":(ht/2)+"px","right": (wd/2)+"px"});
+  //$("#l2").css({"top":br.y+"px","left": tl.left+"px"});
+  //$("#l3").css({"top":br.y+"px","left": br.x+"px"});
+  //$("#l4").css({"top":tl.top+"px","left": br.x+"px"});
+  
+    //$("#l1").append(ne.lat+"<br>");
+    //$("#l1").append(sw.lng);
+    //$("#l2").append(sw.lat+"<br>");
+    //$("#l2").append(sw.lng);
+    //$("#l3").append(sw.lat+"<br>");
+    //$("#l3").append(ne.lng);
+    //$("#l4").append(ne.lat+"<br>");
+    //$("#l4").append(ne.lng);
+    $("#l5").append(ctrlat+"<br>");
+    $("#l5").append(ctrlng);
+  }
+  
+  vidteq._satimg.prototype.getCurrentLatLng=function (){
+    var ll=this.map.getBounds();
+    var sw={lat:ll.N.N,lng:ll.j.j};
+    var ne={lat:ll.N.j,lng:ll.j.N};
+    var ctrlat=this.map.getCenter().lat();
+    var ctrlng=this.map.getCenter().lng();  
+    return {bound:{sw:sw,ne:ne},center:{lat:ctrlat ,lng:ctrlng}};
+  }
+  var si=new vidteq._satimg();
+  google.maps.event.addDomListener(window, 'load', function(){
+   si.initialize(); 
+  });
+
+</script>
+<script type="text/javascript" charset="UTF-8" src="common.js"></script><script type="text/javascript" charset="UTF-8" src="map.js"></script><script type="text/javascript" charset="UTF-8" src="util.js"></script><script type="text/javascript" charset="UTF-8" src="onion.js"></script><script type="text/javascript" charset="UTF-8" src="stats.js"></script><script type="text/javascript" charset="UTF-8" src="controls.js"></script><script type="text/javascript" charset="UTF-8" src="marker.js"></script></head>
+<body>
+<div id="pdiv" style="position:absolute;height: 700px; width: 1400px;top:2px;left:200px;">
+<div id="map_canvas" style="height: 700px; width: 1400px; position: relative; overflow: hidden; transform: translateZ(0px); background-color: rgb(229, 227, 223);"><div class="gm-style" style="position: absolute; left: 0px; top: 0px; overflow: hidden; width: 100%; height: 100%; z-index: 0;"><div style="position: absolute; left: 0px; top: 0px; overflow: hidden; width: 100%; height: 100%; z-index: 0; cursor: url(&quot;http://maps.gstatic.com/mapfiles/openhand_8_8.cur&quot;) 8 8, default;"><div style="position: absolute; left: 0px; top: 0px; z-index: 1; width: 100%; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 100; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 591px; top: 164px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 591px; top: 420px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 335px; top: 164px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 335px; top: 420px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 847px; top: 164px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 847px; top: 420px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 591px; top: 676px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 591px; top: -92px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 335px; top: -92px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 335px; top: 676px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 847px; top: -92px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 847px; top: 676px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1103px; top: 420px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 79px; top: 164px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1103px; top: 164px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 79px; top: 420px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1103px; top: -92px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 79px; top: -92px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 79px; top: 676px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1103px; top: 676px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: -177px; top: 420px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1359px; top: 420px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1359px; top: 164px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: -177px; top: 164px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1359px; top: -92px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: -177px; top: -92px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: -177px; top: 676px;"></div><div style="width: 256px; height: 256px; transform: translateZ(0px); position: absolute; left: 1359px; top: 676px;"></div></div></div></div><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 101; width: 100%;"></div><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 102; width: 100%;"></div><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 103; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: -1;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 591px; top: 164px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 591px; top: 420px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 335px; top: 164px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 335px; top: 420px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 847px; top: 164px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 847px; top: 420px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 591px; top: 676px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 591px; top: -92px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 335px; top: -92px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 335px; top: 676px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 847px; top: -92px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 847px; top: 676px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1103px; top: 420px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 79px; top: 164px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1103px; top: 164px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 79px; top: 420px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1103px; top: -92px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 79px; top: -92px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 79px; top: 676px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1103px; top: 676px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: -177px; top: 420px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1359px; top: 420px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1359px; top: 164px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: -177px; top: 164px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1359px; top: -92px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: -177px; top: -92px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: -177px; top: 676px;"></div><div style="width: 256px; height: 256px; overflow: hidden; transform: translateZ(0px); position: absolute; left: 1359px; top: 676px;"></div></div></div><div style="width: 22px; height: 40px; overflow: hidden; position: absolute; left: 689px; top: 310px; z-index: 350;"><img src="spotlight-poi-dotless.png" draggable="false" style="position: absolute; left: 0px; top: 0px; width: 22px; height: 40px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 700px; top: 322px; z-index: 350;"><div style="height: 100px; margin-top: -50px; margin-left: -50%; display: table; border-spacing: 0px;"><div style="display: table-cell; vertical-align: middle; white-space: nowrap; text-align: center;"><div style="color: rgb(0, 0, 0); font-size: 14px; font-family: Roboto, Arial, sans-serif;">A</div></div></div></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="transform: translateZ(0px); position: absolute; left: 591px; top: 164px; transition: opacity 200ms ease-out;"><img src="kh" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 591px; top: 420px; transition: opacity 200ms ease-out;"><img src="kh(1)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 335px; top: 164px; transition: opacity 200ms ease-out;"><img src="kh(2)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 335px; top: 420px; transition: opacity 200ms ease-out;"><img src="kh(3)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 847px; top: 164px; transition: opacity 200ms ease-out;"><img src="kh(4)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 847px; top: 420px; transition: opacity 200ms ease-out;"><img src="kh(5)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 591px; top: 676px; transition: opacity 200ms ease-out;"><img src="kh(6)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 591px; top: -92px; transition: opacity 200ms ease-out;"><img src="kh(7)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 335px; top: -92px; transition: opacity 200ms ease-out;"><img src="kh(8)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 335px; top: 676px; transition: opacity 200ms ease-out;"><img src="kh(9)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 847px; top: -92px; transition: opacity 200ms ease-out;"><img src="kh(10)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 847px; top: 676px; transition: opacity 200ms ease-out;"><img src="kh(11)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1103px; top: 420px; transition: opacity 200ms ease-out;"><img src="kh(12)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 79px; top: 164px; transition: opacity 200ms ease-out;"><img src="kh(13)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1103px; top: 164px; transition: opacity 200ms ease-out;"><img src="kh(14)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 79px; top: 420px; transition: opacity 200ms ease-out;"><img src="kh(15)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1103px; top: -92px; transition: opacity 200ms ease-out;"><img src="kh(16)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 79px; top: -92px; transition: opacity 200ms ease-out;"><img src="kh(17)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 79px; top: 676px; transition: opacity 200ms ease-out;"><img src="kh(18)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1103px; top: 676px; transition: opacity 200ms ease-out;"><img src="kh(19)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: -177px; top: 420px; transition: opacity 200ms ease-out;"><img src="kh(20)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1359px; top: 420px; transition: opacity 200ms ease-out;"><img src="kh(21)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1359px; top: 164px; transition: opacity 200ms ease-out;"><img src="kh(22)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: -177px; top: 164px; transition: opacity 200ms ease-out;"><img src="kh(23)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1359px; top: -92px; transition: opacity 200ms ease-out;"><img src="kh(24)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: -177px; top: -92px; transition: opacity 200ms ease-out;"><img src="kh(25)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: -177px; top: 676px; transition: opacity 200ms ease-out;"><img src="kh(26)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="transform: translateZ(0px); position: absolute; left: 1359px; top: 676px; transition: opacity 200ms ease-out;"><img src="kh(27)" draggable="false" alt="" style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 2; width: 100%; height: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 3; width: 100%; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 104; width: 100%;"></div><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 105; width: 100%;"></div><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 106; width: 100%;"><div class="gmnoprint" style="width: 22px; height: 40px; overflow: hidden; position: absolute; opacity: 0.01; left: 689px; top: 310px; z-index: 350;"><img src="spotlight-poi-dotless.png" draggable="false" usemap="#gmimap0" style="position: absolute; left: 0px; top: 0px; width: 22px; height: 40px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"><map name="gmimap0" id="gmimap0"><area href="javascript:void(0)" log="miw" coords="8,0,5,1,4,2,3,3,2,4,2,5,1,6,1,7,0,8,0,14,1,15,1,16,2,17,2,18,3,19,3,20,4,21,5,22,5,23,6,24,7,25,7,27,8,28,8,29,9,30,9,33,10,34,10,40,11,40,11,34,12,33,12,30,13,29,13,28,14,27,14,25,15,24,16,23,16,22,17,21,18,20,18,19,19,18,19,17,20,16,20,15,21,14,21,8,20,7,20,6,19,5,19,4,18,3,17,2,16,1,14,1,13,0,8,0" shape="poly" title="" style="cursor: pointer;"></map></div></div><div style="transform: translateZ(0px); position: absolute; left: 0px; top: 0px; z-index: 107; width: 100%;"></div></div></div><div style="padding: 15px 21px; border: 1px solid rgb(171, 171, 171); font-family: Roboto, Arial, sans-serif; color: rgb(34, 34, 34); box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 16px; z-index: 10000002; display: none; width: 256px; height: 148px; position: absolute; left: 550px; top: 260px; background-color: white;"><div style="padding: 0px 0px 10px; font-size: 16px;">Map Data</div><div style="font-size: 13px;">Imagery ©2015 CNES / Astrium, DigitalGlobe</div><div style="width: 13px; height: 13px; overflow: hidden; position: absolute; opacity: 0.7; right: 12px; top: 12px; z-index: 10000; cursor: pointer;"><img src="mapcnt6.png" draggable="false" style="position: absolute; left: -2px; top: -336px; width: 59px; height: 492px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div><div class="gmnoprint" style="z-index: 1000001; position: absolute; right: 24px; bottom: 0px; width: 12px;"><div draggable="false" class="gm-style-cc" style="-webkit-user-select: none; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="width: auto; height: 100%; margin-left: 1px; background-color: rgb(245, 245, 245);"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a style="color: rgb(68, 68, 68); text-decoration: none; cursor: pointer; display: none;">Map Data</a><span>Imagery ©2015 CNES / Astrium, DigitalGlobe</span></div></div></div><div class="gmnoscreen" style="position: absolute; right: 0px; bottom: 0px;"><div style="font-family: Roboto, Arial, sans-serif; font-size: 11px; color: rgb(68, 68, 68); direction: ltr; text-align: right; background-color: rgb(245, 245, 245);">Imagery ©2015 CNES / Astrium, DigitalGlobe</div></div><div class="gmnoprint gm-style-cc" draggable="false" style="z-index: 1000001; -webkit-user-select: none; height: 14px; line-height: 14px; position: absolute; right: 12px; bottom: 0px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="width: auto; height: 100%; margin-left: 1px; background-color: rgb(245, 245, 245);"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a href="https://www.google.com/intl/en-US_US/help/terms_maps.html" target="_blank" style="text-decoration: none; cursor: pointer; color: rgb(68, 68, 68);">Terms of Use</a></div></div><div draggable="false" class="gm-style-cc" style="-webkit-user-select: none; height: 14px; line-height: 14px; position: absolute; right: 0px; bottom: 0px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="width: auto; height: 100%; margin-left: 1px; background-color: rgb(245, 245, 245);"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a target="_new" title="Report errors in the road map or imagery to Google" href="https://www.google.com/maps/@13.0079617,77.7157064,17z/data=!3m1!1e3!10m1!1e1!12b1?source=apiv3&amp;rapsrc=apiv3" style="font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); text-decoration: none; position: relative;">Report a map error</a></div></div><div class="gmnoprint" draggable="false" controlwidth="0" controlheight="0" style="margin: 10px; -webkit-user-select: none; position: absolute; display: none; bottom: 14px; right: 0px;"><div class="gmnoprint" controlwidth="28" controlheight="0" style="display: none; position: absolute;"><div title="Rotate map 90 degrees" style="width: 28px; height: 28px; overflow: hidden; position: absolute; border-radius: 2px; box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px; cursor: pointer; display: none; background-color: rgb(255, 255, 255);"><img src="tmapctrl4.png" draggable="false" style="position: absolute; left: -141px; top: 6px; width: 170px; height: 54px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div class="gm-tilt" style="width: 28px; height: 28px; overflow: hidden; position: absolute; border-radius: 2px; box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px; top: 0px; cursor: pointer; background-color: rgb(255, 255, 255);"><img src="tmapctrl4.png" draggable="false" style="position: absolute; left: -141px; top: -13px; width: 170px; height: 54px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div><div class="gmnoprint" style="margin: 10px; z-index: 0; position: absolute; cursor: pointer; left: 0px; top: 0px;"><div class="gm-style-mtc" style="float: left;"><div draggable="false" title="Show street map" style="direction: ltr; overflow: hidden; text-align: center; position: relative; color: rgb(86, 86, 86); font-family: Roboto, Arial, sans-serif; -webkit-user-select: none; font-size: 11px; padding: 8px; border-bottom-left-radius: 2px; border-top-left-radius: 2px; -webkit-background-clip: padding-box; box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px; min-width: 22px; background-color: rgb(255, 255, 255); background-clip: padding-box;">Map</div><div style="z-index: -1; padding: 2px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px; position: absolute; left: 0px; top: 29px; text-align: left; display: none; background-color: white;"><div draggable="false" title="Show street map with terrain" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; -webkit-user-select: none; font-size: 11px; padding: 6px 8px 6px 6px; direction: ltr; text-align: left; white-space: nowrap; background-color: rgb(255, 255, 255);"><span role="checkbox" style="box-sizing: border-box; position: relative; line-height: 0; font-size: 0px; margin: 0px 5px 0px 0px; display: inline-block; border: 1px solid rgb(198, 198, 198); border-radius: 1px; width: 13px; height: 13px; vertical-align: middle; background-color: rgb(255, 255, 255);"><div style="position: absolute; left: 1px; top: -2px; width: 13px; height: 11px; overflow: hidden; display: none;"><img src="imgs8.png" draggable="false" style="position: absolute; left: -52px; top: -44px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 68px; height: 67px;"></div></span><label style="vertical-align: middle; cursor: pointer;">Terrain</label></div></div></div><div class="gm-style-mtc" style="float: left;"><div draggable="false" title="Show satellite imagery" style="direction: ltr; overflow: hidden; text-align: center; position: relative; color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; -webkit-user-select: none; font-size: 11px; padding: 8px; border-bottom-right-radius: 2px; border-top-right-radius: 2px; -webkit-background-clip: padding-box; box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px; border-left-width: 0px; min-width: 40px; font-weight: 500; background-color: rgb(255, 255, 255); background-clip: padding-box;">Satellite</div><div style="z-index: -1; padding: 2px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px; position: absolute; right: 0px; top: 29px; text-align: left; display: none; background-color: white;"><div draggable="false" title="Show imagery with street names" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; -webkit-user-select: none; font-size: 11px; padding: 6px 8px 6px 6px; direction: ltr; text-align: left; white-space: nowrap; background-color: rgb(255, 255, 255);"><span role="checkbox" style="box-sizing: border-box; position: relative; line-height: 0; font-size: 0px; margin: 0px 5px 0px 0px; display: inline-block; border: 1px solid rgb(198, 198, 198); border-radius: 1px; width: 13px; height: 13px; vertical-align: middle; background-color: rgb(255, 255, 255);"><div style="position: absolute; left: 1px; top: -2px; width: 13px; height: 11px; overflow: hidden; display: none;"><img src="imgs8.png" draggable="false" style="position: absolute; left: -52px; top: -44px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 68px; height: 67px;"></div></span><label style="vertical-align: middle; cursor: pointer;">Labels</label></div></div></div></div><div style="margin-left: 5px; margin-right: 5px; z-index: 1000000; position: absolute; left: 0px; bottom: 0px;"><a target="_blank" href="https://maps.google.com/maps?ll=13.007962,77.715706&amp;z=17&amp;t=k&amp;hl=en-US&amp;gl=US&amp;mapclient=apiv3" title="Click to see this area on Google Maps" style="position: static; overflow: visible; float: none; display: inline;"><div style="width: 66px; height: 26px; cursor: pointer;"><img src="google_white5.png" draggable="false" style="position: absolute; left: 0px; top: 0px; width: 66px; height: 26px; -webkit-user-select: none; border: 0px; padding: 0px; margin: 0px;"></div></a></div></div></div>
+
+<p id="l1" style="position: absolute;">
+</p><p id="l2" style="position: absolute;">
+</p><p id="l3" style="position: absolute;">
+</p><p id="l4" style="position: absolute;">
+</p><p id="l5" style="position: absolute;"></p>
+<img id="mark" style="position: absolute;">
+</div>
+
+<div id="tdiv" style="position:absolute;top:2px;left:2px;">
+
+<table border="1">
+<tbody><tr><td colspan="3">ll lat: <input id="lllat" size="12"></td></tr>
+<tr><td colspan="3">ll lon: <input id="lllon" size="12"></td></tr>
+<tr><td colspan="3">ur lat: <input id="urlat" size="12"></td></tr>
+<tr><td colspan="3">ur lon: <input id="urlon" size="12"></td></tr>
+<tr>
+<td colspan="2"><button id="go1">Go</button></td></tr>
+<tr>
+<td>Col:<input id="colval" size="5" style="width:20px"></td>
+<td>Row:<input id="rowval" size="5" style="width:20px"></td>
+
+</tr>
+<tr><td colspan="2"><button id="start">Start</button></td>
+
+</tr><tr><td colspan="3">Col:-<label id="ccount"></label></td></tr>
+<tr><td colspan="3">Row:-<label id="rcount"></label></td></tr>
+
+<tr><td><button id="bound">Save Img</button></td>
+<td><button id="merge" onclick="alert(&#39;dir to save\n:montage -mode concatenate -tile ColxRow *.png result1.png&#39;);">Merge Img</button></td></tr>
+<tr><td colspan="2"><button id="reset" onclick="alert(&#39;TBD&#39;);">Reset</button></td></tr>
+</tbody></table>
+<br>
+</div>
+
+<div id="tdiv" style="position:absolute;top:300px;left:2px;">
+<table border="1">
+<tbody><tr><td></td><td><button id="north">PanN</button> </td><td></td></tr>
+<tr><td><button id="west">PanW</button></td><td><button id="next">Next</button> </td><td><button id="east">PanE</button></td></tr>
+<tr><td></td><td><button id="south">PanS</button> </td><td></td></tr>
+<tr><td></td><td></td><td></td></tr>
+<tr><td><button id="starter">Starter</button></td><td></td><td><button id="capture">Cap</button></td></tr>
+<tr><td colspan="3"> lat: <input id="latMap" size="15"></td></tr>
+<tr><td colspan="3">lon: <input id="lngMap" size="15"></td></tr>
+
+</tbody></table>
+<br>
+
+<input type="button" id="help" value="Help">
+</div>
+<div id="op" style="position:absolute;top:500px;left:2px;">
+<img id="stack">
+<div id="img-out"></div>
+</div>
+ 
+
+
+<script>
+
+//$("#mapImg").attr("src",src);
+//html2canvas($("#map_canvas"), {
+//onrendered: function(canvas) {
+//theCanvas = canvas;
+//document.body.appendChild(canvas);
+//
+//// Convert and download as image 
+//Canvas2Image.saveAsPNG(canvas); 
+//$("#img-out").append(canvas);
+//// Clean up 
+////document.body.removeChild(canvas);
+//}
+//});
+</script>
+</body></html>
