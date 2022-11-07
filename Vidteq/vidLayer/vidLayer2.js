@@ -17,6 +17,7 @@ var vtt = new vidteq._vidLayer();
 
 
 vidteq._vidLayer.prototype.init = function () {
+  console.log("init")
   if (!Detector.webgl) Detector.addGetWebGLMessage();
   this.scene = new THREE.Scene();
 
@@ -173,6 +174,8 @@ vidteq._vidLayer.prototype.onWindowResize = function () {
   this.renderer.setSize(window.innerWidth, window.innerHeight);
 }
 vidteq._vidLayer.prototype.constructTiles = function () {
+  console.log("constructTiles")
+
   var tu = 256, w = 10, h = 10;
 
   var x0 = -parseInt(tu * w / 2);
@@ -209,7 +212,7 @@ vidteq._vidLayer.prototype.constructTiles = function () {
 vidteq._vidLayer.prototype.animate = function () {
   //var ii=0;
   var that = this;
-  console.log(that);
+  console.log("animate");
   function animation() {
     requestAnimationFrame(animation);
     if (that.tbc) {
@@ -246,8 +249,16 @@ vidteq._vidLayer.prototype.animate = function () {
       that.stopSign.rotation.y += 0.01;
 
     }
+    //console.log(that.tempObjCamCar)
     if (that.tempObjCamCar && that.tempObjCamCar.allow) {
-      if (that.tempObjCamCar.count > 1) { delete that.tempObjCamCar; return; }
+      if (that.tempObjCamCar.count > 1) { 
+        delete that.tempObjCamCar; 
+        console.log(that.fromToLatLon);
+      //that.moveCarTo(that.fromToLatLon[0].position.x+":"+that.fromToLatLon[0].position.y);
+      that.startCar=true;
+        return; 
+      }
+      that.startCar=false;
       var pos = that.tempObjCamCar.CamPath.getPointAt(that.tempObjCamCar.count);
       that.camera.position.copy(pos);
       that.tempObjCamCar.count += 0.01;
@@ -256,6 +267,9 @@ vidteq._vidLayer.prototype.animate = function () {
       } else {
         that.controls.target.copy(that.tempObjCamCar.focusPoint);
       }
+    }
+    if(that.startCar){
+      that.moveCarToTmp(0);
     }
     //for checking zooming cond.
     //that.decideWhenToZoom();
@@ -352,7 +366,7 @@ vidteq._vidLayer.prototype.checkObjectsToKIV = function () {
   }
 }
 
-vidteq._vidLayer.prototype.smoothCamMoveToCarAtStart = function () {
+vidteq._vidLayer.prototype.smoothCamMoveToCarAtStart = async function () {
   console.log("smoothCamMoveToCarAtStart");
   if (!('tempObjCamCar' in this)) { this.tempObjCamCar = {}; }
   //else {return;}
@@ -367,6 +381,7 @@ vidteq._vidLayer.prototype.smoothCamMoveToCarAtStart = function () {
 }
 
 vidteq._vidLayer.prototype.renderCar = function () {
+  console.log("renderCar")
   var delta = this.clock.getDelta();
   var et = this.clock.getElapsedTime();
   //if(!('oneSecElapTime' in this)){this.oneSecElapTime=0;}
@@ -387,7 +402,7 @@ vidteq._vidLayer.prototype.renderCar = function () {
     ));
     var ang = Math.atan2(carPos.x - this.carmesh.root.position.x, carPos.z - this.carmesh.root.position.z);
     this.carmesh.root.rotation.y = ang;
-    this.carmesh.root.position.copy(carPos);
+    this.carmesh.root.position.copy(this.roadGeometry[this.currentCarPosIndexInRoad]);
     //console.log(this.carmesh.root.position);
     var rotPos = new THREE.Vector3(carPos.x + 5 * (Math.random()), carPos.y, carPos.z + 2 * (Math.random()));
     this.carWheelRotate(rotPos);
@@ -530,7 +545,7 @@ vidteq._vidLayer.prototype.renderCar = function () {
 }
 
 vidteq._vidLayer.prototype.carWheelRotate = function (target) {
-  //console.log("carWheelRotate",this.carmesh.root.children[1].rotation);
+  console.log("carWheelRotate");
   //console.log("target",target);
   var ev = new THREE.Vector3(0, 0, 0);
   if (!('previousOrientation' in this.carmesh)) { this.carmesh.previousOrientation = new THREE.Vector3(1, 0, 1); }
@@ -562,6 +577,8 @@ vidteq._vidLayer.prototype.carWheelRotateOld = function () {
 
 }
 vidteq._vidLayer.prototype.initForTiler = function (cb) {
+  console.log("initForTiler");
+
   var that = this;
   $("#cancon canvas").attr('id', 'viewer');
   vidteq.cfg = vidteq._vidteqCfg;
@@ -1241,6 +1258,7 @@ vidteq._vidLayer.prototype.findCarStop = function (index) {
 }
 
 vidteq._vidLayer.prototype.moveCarTo = function (index) {
+  console.log("moveCarTo")
   var t = index.split(":");
   var parentIndex = parseInt(t[0]);
   var childIndex = parseInt(t[1]);
@@ -1287,6 +1305,18 @@ vidteq._vidLayer.prototype.moveCarTo = function (index) {
   //TBD: currently its intrusive with user interaction with map
   //this.keepInView(carPos,'video');
 }
+
+vidteq._vidLayer.prototype.moveCarToTmp = function (index) {
+  console.log("moveCarTo")
+  if(!this.currentCarPosIndexInRoad)this.currentCarPosIndexInRoad=index;
+if(this.roadGeometry.length===this.currentCarPosIndexInRoad+1)return;
+  this.renderTargets = {
+    next2Point: this.roadGeometry[this.currentCarPosIndexInRoad+=1]
+  };
+  console.log(this.roadGeometry[this.currentCarPosIndexInRoad])
+
+
+ }
 
 vidteq._vidLayer.prototype.toLl = function (point) {
   var t = point.split(" ");
@@ -1375,7 +1405,7 @@ function call_state(res) {
   ////vidteq.gui.check3dCarProximity(stringResponse);
 }
 
-vidteq._vidLayer.prototype.makeRouteLayer = function (videoSum) {
+vidteq._vidLayer.prototype.makeRouteLayer = async function (videoSum) {
   function randomRange(min, max) {
     return (Math.random() * (max - min)) + min;
 
@@ -1403,14 +1433,14 @@ vidteq._vidLayer.prototype.makeRouteLayer = function (videoSum) {
   }
   lat.push(this.fromToLatLon[1].lat)
   lon.push(this.fromToLatLon[1].lon)
-  console.log({ lat, lon });
+  //console.log({ lat, lon });
 
   //lat.sort();lon.sort();
   let ll = [];
   for (let i = 0; i < lat.length; i++) {
     ll.push(lon[i] + " " + lat[i])
   }
-  console.log(ll.toString())
+  //console.log(ll.toString())
   dt.edge.wkt = ll.toString();
   //temp end
 
@@ -1444,8 +1474,8 @@ vidteq._vidLayer.prototype.makeRouteLayer = function (videoSum) {
   //}
   that.latLonG = fv;
   //console.log("success",JSON.stringify(fv));alert()
-  this.getPathMesh();
-  this.smoothCamMoveToCarAtStart();
+  await this.getPathMesh();  
+  await this.smoothCamMoveToCarAtStart();  
   this.makeRouteLayerCreated = true;
   //this.tiler.venue360.getPathMesh=this.getPathMesh;
   var x = -this.tiler.tI.tu * (this.tiler.lastBbox.c.lon - fv[0].lon) / this.tiler.tI.resTile;
@@ -1456,18 +1486,18 @@ vidteq._vidLayer.prototype.makeRouteLayer = function (videoSum) {
 
 }
 
-vidteq._vidLayer.prototype.getPathMesh = function () {
+vidteq._vidLayer.prototype.getPathMesh = async function () {
   console.log("getPathMesh");
   var fv = this.latLonG;
   var ver = []; var ver1 = [];
-  console.log("getPathMesh", this);
+  //console.log("getPathMesh", this);
   for (var i in fv) {
     var x = -this.tiler.tI.tu * (this.tiler.lastBbox.c.lon - fv[i].lon) / this.tiler.tI.resTile;
     var z = this.tiler.tI.tu * (this.tiler.lastBbox.c.lat - fv[i].lat) / this.tiler.tI.resTile;
     ver1.push(new THREE.Vector3(x, this.tiler.tI.gY, z));
-    console.log({ x, y: this.tiler.tI.gY, z })
+    //console.log({ x, y: this.tiler.tI.gY, z })
   }
-  console.log(this.tiler.tI.tu);
+  //console.log(this.tiler.tI.tu);
   //console.log(JSON.stringify(ver1));  
   this.roadGeometry = ver1;
   //this.tiler.venue360.roadGeometry=this.roadGeometry;
@@ -1561,6 +1591,7 @@ vidteq._vidLayer.prototype.getPathMesh = function () {
 }
 
 vidteq._vidLayer.prototype.getConnectedPathMesh = function (p1, p2) {
+  console.log("getConnectedPathMesh",{p1,p2})
   var hd = (p1.distanceTo(p2)) / 4;
 
   var mp = new THREE.Vector3((p1.x + p2.x) / 2, hd, (p1.z + p2.z) / 2);
@@ -1983,6 +2014,8 @@ vidteq._vidLayer.prototype.addCar = function (startPoint) {
     //console.log(that.carmesh);
     //if(!('renderCarFlag' in that)){that.renderCarFlag=true;}
     console.log(that.renderCarFlag);
+    //that.moveCarTo(`${startPoint.x+":"+startPoint.y}`);
+
     if (that.renderCarFlag) {
       //console.log(that.loaded);
       console.log(that.renderCarFlag);
