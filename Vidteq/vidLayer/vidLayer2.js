@@ -402,7 +402,9 @@ vidteq._vidLayer.prototype.renderCar = function () {
     ));
     var ang = Math.atan2(carPos.x - this.carmesh.root.position.x, carPos.z - this.carmesh.root.position.z);
     this.carmesh.root.rotation.y = ang;
-    this.carmesh.root.position.copy(this.roadGeometry[this.currentCarPosIndexInRoad]);
+    //this.carmesh.root.position.copy(this.roadGeometry[this.currentCarPosIndexInRoad]);
+    this.carmesh.root.position.copy(this.carSyncPoint[this.currentCarPosIndexInRoad]);
+
     //console.log(this.carmesh.root.position);
     var rotPos = new THREE.Vector3(carPos.x + 5 * (Math.random()), carPos.y, carPos.z + 2 * (Math.random()));
     this.carWheelRotate(rotPos);
@@ -541,6 +543,85 @@ vidteq._vidLayer.prototype.renderCar = function () {
     }
     //console.log(this.carmesh.root.position);
     this.ii++;
+  }
+}
+
+
+vidteq._vidLayer.prototype.renderCarTmp = function () {
+  console.log("renderCar")
+  var delta = this.clock.getDelta();
+  var et = this.clock.getElapsedTime();
+  //if(!('oneSecElapTime' in this)){this.oneSecElapTime=0;}
+  //if(et>=this.oneSecElapTime+1 && et<this.oneSecElapTime+1.1){
+  //  this.oneSecElapTime=parseInt(et);
+  //  console.log(this.oneSecElapTime);
+  //}
+  //this.controls.update(delta); 
+  //console.log(this.carmesh.root.position);
+  //this.carmesh.updateCarModel(delta,this.carEvent);
+  if (this.carMarkers) {
+    var markPoint = this.carMarkers.markPoint;
+    var markTime = this.carMarkers.markTime;
+    var speed = this.carMarkers.speed;
+    var carPos = markPoint.clone().add(speed.clone().multiplyScalar(
+      //((new Date()).getTime()-markTime.getTime())/1000
+      et - markTime
+    ));
+    var ang = Math.atan2(carPos.x - this.carmesh.root.position.x, carPos.z - this.carmesh.root.position.z);
+    this.carmesh.root.rotation.y = ang;
+    this.carmesh.root.position.copy(this.cars[this.currentCarPosIndexInRoad]);
+    //console.log(this.carmesh.root.position);
+    var rotPos = new THREE.Vector3(carPos.x + 5 * (Math.random()), carPos.y, carPos.z + 2 * (Math.random()));
+    this.carWheelRotate(rotPos);
+
+    if (this.kIVBlackOut) { } else {
+      if (!('carControlOn' in this)) { this.carControlOn = 0; }
+      this.carControlOn++;
+      this.camera.position.set(carPos.x, carPos.y + 100, carPos.z + 200);
+      this.controls.target.copy(this.carmesh.root.position);
+    }
+
+    this.store('newCarPosStore', carPos, 10);
+  }
+  if (this.renderTargets) {
+    this.store('renderTargetsStore', this.renderTargets, 10);
+    var renderTargets = this.renderTargets;
+    delete this.renderTargets;
+    // TBD if renderTargets.next2Point is not there - what do we do
+
+    if (!renderTargets.next2Point) {
+      delete this.carMarkers;  // TBD TBD
+    }
+    //var curPoint = new THREE.Vector3(
+    //  renderTargets.curPoint.x
+    //  ,renderTargets.curPoint.y
+    //  ,renderTargets.curPoint.z
+    //);
+    //this.carmesh.root.position.copy(curPoint);
+    var targetPoint = new THREE.Vector3(
+      renderTargets.next2Point.x
+      , renderTargets.next2Point.y
+      , renderTargets.next2Point.z
+    );
+    this.store('targetPointStore', targetPoint, 10);
+    var carPos = this.carmesh.root.position;
+    this.store('carPosStore', carPos.clone(), 10);
+    var speed = targetPoint.clone().sub(carPos).divideScalar(2);
+    var markPoint = carPos.clone();
+    //var markTime = new Date();
+    var markTime = et;
+    if (this.carMarkers) {
+      this.carMarkers.speed = speed;
+      this.carMarkers.markPoint = markPoint;
+      this.carMarkers.markTime = markTime;
+    } else {
+      this.carMarkers = {
+        speed: speed
+        , markPoint: markPoint
+        , markTime: markTime
+      };
+    }
+    this.store('carMarkersStore', this.carMarkers, 10);
   }
 }
 
@@ -1309,11 +1390,11 @@ vidteq._vidLayer.prototype.moveCarTo = function (index) {
 vidteq._vidLayer.prototype.moveCarToTmp = function (index) {
   console.log("moveCarTo")
   if(!this.currentCarPosIndexInRoad)this.currentCarPosIndexInRoad=index;
-if(this.roadGeometry.length===this.currentCarPosIndexInRoad+1)return;
+if(this.carSyncPoint.length===this.currentCarPosIndexInRoad+1)return;
   this.renderTargets = {
-    next2Point: this.roadGeometry[this.currentCarPosIndexInRoad+=1]
+    next2Point: this.carSyncPoint[this.currentCarPosIndexInRoad+=1]
   };
-  console.log(this.roadGeometry[this.currentCarPosIndexInRoad])
+  console.log(this.carSyncPoint[this.currentCarPosIndexInRoad])
 
 
  }
@@ -1404,13 +1485,11 @@ function call_state(res) {
   //}
   ////vidteq.gui.check3dCarProximity(stringResponse);
 }
+vidteq._vidLayer.prototype.randomRange = function (min, max) {
+  return (Math.random() * (max - min)) + min;
 
+}
 vidteq._vidLayer.prototype.makeRouteLayer = async function (videoSum) {
-  function randomRange(min, max) {
-    return (Math.random() * (max - min)) + min;
-
-  }
-
   console.log('makeRouteLayer ');
   if (this.makeRouteLayerCreated) { return; }
   this.delTheCar = true;
@@ -1428,8 +1507,8 @@ vidteq._vidLayer.prototype.makeRouteLayer = async function (videoSum) {
 
   let range = 9;
   for (let i = 0; i < range; i++) {
-    lat.push(randomRange(this.fromToLatLon[0].lat, this.fromToLatLon[1].lat))
-    lon.push(randomRange(this.fromToLatLon[0].lon, this.fromToLatLon[1].lon))
+    lat.push(this.randomRange(this.fromToLatLon[0].lat, this.fromToLatLon[1].lat))
+    lon.push(this.randomRange(this.fromToLatLon[0].lon, this.fromToLatLon[1].lon))
   }
   lat.push(this.fromToLatLon[1].lat)
   lon.push(this.fromToLatLon[1].lon)
@@ -1501,6 +1580,21 @@ vidteq._vidLayer.prototype.getPathMesh = async function () {
   //console.log(JSON.stringify(ver1));  
   this.roadGeometry = ver1;
   //this.tiler.venue360.roadGeometry=this.roadGeometry;
+  this.carSyncPoint=[];
+  for(let i=0;i<ver1.length-1;i++){
+    this.carSyncPoint.push(ver1[i]);
+    for(let j=0;j<100;j++){
+      this.carSyncPoint.push(new THREE.Vector3(
+        this.randomRange(Math.min(ver1[i].x,ver1[i+1].x),Math.max(ver1[i].x,ver1[i+1].x))
+        ,this.tiler.tI.gY
+        ,this.randomRange(Math.min(ver1[i].z,ver1[i+1].z),Math.max(ver1[i].z,ver1[i+1].z))
+      ));
+
+    }
+  }
+  this.carSyncPoint.push(ver1[ver1.length-1]);
+console.log({roadGeometry:this.roadGeometry,carSyncPoint:this.carSyncPoint});
+
   this.store('roadGeometry1', $.extend(true, [], ver1), 10);
   //-----------------
   var g = new THREE.Geometry();
