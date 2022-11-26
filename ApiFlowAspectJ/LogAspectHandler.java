@@ -23,22 +23,29 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 /*
- in notepad++
- in find->mark all:
- check bookmar lines
- 1. (?!^.*logAroundController=>.*$)^.+\r?\n    ===>Go to Menu "Search - Bookmark - Remove bookmarked lines"
- 2. ^\r\n   && ^.*(?=<div\s)  ===>replace all ""
- 
+ Setup native AspectJ support for logging like inner/private methods(Spring AOP proxy based not supported)
 
+ in notepad++ find->mark all:
+ check bookmar lines
+ 1. (?!^.*htmlLog.*$)^.+\r?\n    ===>Go to Menu "Search - Bookmark - Remove bookmarked lines"
+ 2. (?!^.*at .*$)^.+\r?\n    ===>Go to Menu "Search - Bookmark - Remove unbookmarked lines"
+ 3. ^.*(?=<div\s)  ===>replace all ""
+ 
+----in prop----
+logging.level.org.springframework=INFO
+logging.level.org.springframework.web=error
+logging.level.org.hibernate=DEBUG
+logging.level.org.hibernate.stat=debug
+logging.level.org.springframework.data.*.*=trace
  */
 @Aspect
 @Component
 @Slf4j
 public class LogAspectHandler {
-	
-	int paddingLeft=10;
+
+	int paddingLeft = 10;
+	int paddingLeftIncr = 15;
 
 	@Pointcut("execution(* com.ctl.bmp..*.controller..*.*(..))")
 	public void controller() {
@@ -48,21 +55,19 @@ public class LogAspectHandler {
 	public void service() {
 	}
 
-	
-    @Around("controller()")
-    public Object logAroundController(ProceedingJoinPoint joinPoint) throws Throwable {
+	@Around("controller()")
+	public Object logAroundController(ProceedingJoinPoint joinPoint) throws Throwable {
 
+		try {
+			paddingLeft = 10;
+			Object result = joinPoint.proceed();
+			return result;
+		} catch (Exception exn) {
+			throw exn;
+		}
 
-        try {
-        	paddingLeft=10;
-            Object result = joinPoint.proceed();
-            return result;
-        } catch (Exception exn) {
-            throw exn;
-        }
+	}
 
-    }
-    
 	@Around("service()")
 	public Object logAroundService(ProceedingJoinPoint joinPoint) throws Throwable {
 
@@ -70,8 +75,8 @@ public class LogAspectHandler {
 		String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
 		String methodName = joinPoint.getSignature().getName();
 
-		//return simpleLog(className, methodName, joinPoint);
-		return htmlLog(className, methodName,joinPoint);
+		// return simpleLog(className, methodName, joinPoint);
+		return htmlLog(className, methodName, joinPoint);
 
 	}
 
@@ -90,16 +95,19 @@ public class LogAspectHandler {
 	}
 
 	private Object htmlLog(String className, String methodName, ProceedingJoinPoint joinPoint) throws Throwable {
-		String css=String.format("padding-left:%dpx;color:%s",(paddingLeft=paddingLeft+5),String.format("#%06x", new Random().nextInt(0xffffff + 1)));
+		String css = String.format("padding-left:%dpx;color:%s", (paddingLeft = paddingLeft + paddingLeftIncr),
+				String.format("#%06x", new Random().nextInt(0xffffff + 1)));
 
 		try {
-			log.info("htmlLog=><div style='{}'>class={},methodName={} started</div>", css,className, getMethodSignature(joinPoint));
+			//log.info("htmlLog=><div style='{}'>class={},methodName={} started</div>", css, className,getMethodSignature(joinPoint));
+			log.info("htmlLog=><div style='{}'>{}. Class.method()={} <strong>started</strong></div>", css,paddingLeft, getMethodSignature(joinPoint));
 			Object result = joinPoint.proceed();
-			log.info("htmlLog=><div style='{}'>class={},methodName={} ended</div>",css, className, methodName);
-
+			log.info("htmlLog=><div style='{}'>{}. Class.method()={} <strong>[ended]</strong></div>", css,paddingLeft, getMethodSignature(joinPoint));
+			paddingLeft = paddingLeft - paddingLeftIncr;
 			return result;
 		} catch (Exception exn) {
-			log.info("htmlLog=><div style='{}'>class={},methodName={} err={}</div>",css, className, methodName,exn.getMessage());
+			log.info("htmlLog=><div style='{}'>{}. Class.method()={} err={} <strong>[ended]</strong></div>", css,paddingLeft, getMethodSignature(joinPoint),exn.getMessage());
+			paddingLeft = paddingLeft - paddingLeftIncr;
 			throw exn;
 		}
 
@@ -113,15 +121,18 @@ public class LogAspectHandler {
 //			System.out.println(method.getParameters()[0].getParameterizedType().getTypeName());
 
 		// return method.toString();//
-		// return methodSignature.toShortString()
-		// return methodSignature.toString()
+		return methodSignature.toShortString();
+		// return methodSignature.toString();
 
-		return String.format("%s %s %s(%s)", Modifier.toString(method.getModifiers()),
-				method.getReturnType().getSimpleName(), method.getName(),
-				Arrays.asList(method.getParameters()).stream()
-						.map(m -> m.getParameterizedType().getTypeName()
-								.substring(m.getParameterizedType().getTypeName().lastIndexOf(".") + 1))
-						.collect(Collectors.toList()).toString().replace("[", "").replace("]", ""));
+		/*
+		 * return String.format("%s %s %s(%s)",
+		 * Modifier.toString(method.getModifiers()),
+		 * method.getReturnType().getSimpleName(), method.getName(),
+		 * Arrays.asList(method.getParameters()).stream() .map(m ->
+		 * m.getParameterizedType().getTypeName()
+		 * .substring(m.getParameterizedType().getTypeName().lastIndexOf(".") + 1))
+		 * .collect(Collectors.toList()).toString().replace("[", "").replace("]", ""));
+		 */
 
 	}
 

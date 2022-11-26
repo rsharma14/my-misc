@@ -1,0 +1,11 @@
+
+<aspectj>
+	<aspects>
+		<aspect name="com.simbatech.apiflow.LogAspectHandlerNative" />
+		<weaver options="-verbose -showWeaveInfo">
+			<include within="com.simbatech.apiflow.spring.*" />
+			<include within="com.simbatech.apiflow..*" /> <!-- IMPORTANT: pkg of aspect class must include -->
+			
+		</weaver>
+	</aspects>
+</aspectj>
