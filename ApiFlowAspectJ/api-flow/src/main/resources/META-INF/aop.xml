@@ -3,9 +3,22 @@
 	<aspects>
 		<aspect name="com.simbatech.apiflow.LogAspectHandlerNative" />
 		<weaver options="-verbose -showWeaveInfo">
-			<include within="com.simbatech.apiflow.spring.*" />
+			<!-- DONT TOUCH -->
 			<include within="com.simbatech.apiflow..*" /> <!-- IMPORTANT: pkg of aspect class must include -->
+			<!-- DONT TOUCH END -->
+			<!-- default -->
+			<include within="org.springframework.web.client..*" />
+			<include within="org.springframework.web.reactive.function.client..*" />
+			<include within="org.springframework.data.repository.core..*" />
+<!-- 						<include within="org.hibernate..*" /> -->
 			
+			<!-- default end -->
+			
+			<!-- add your packages to be advised here-->
+			<include within="com.spring..*" />
+			<include within="com.jpa..*" />
+			
+
 		</weaver>
 	</aspects>
 </aspectj>
