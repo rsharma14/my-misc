@@ -23,7 +23,7 @@ NB:Before hitting api clean log file to get specific log info.
 
 ->in notepad++ paste all logs
 ->1. replace all with empty "":[preffered]
-  =>(?!^.*htmlLog.*$)^.+\r?\n  
+  =>(?!^.*htmlLog.*$)^.+\r?\n
   =>^.*(?=<div\s)
   =>(?!^.*at .*$)^.+\r?\n
 ->save file as .html and see 

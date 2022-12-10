@@ -9,14 +9,13 @@
 			<!-- default -->
 			<include within="org.springframework.web.client..*" />
 			<include within="org.springframework.web.reactive.function.client..*" />
-			<include within="org.springframework.data.repository.core..*" />
+			<include within="org.springframework.data.repository.core.support..*" />
 <!-- 						<include within="org.hibernate..*" /> -->
 			
 			<!-- default end -->
 			
 			<!-- add your packages to be advised here-->
 			<include within="com.spring..*" />
-			<include within="com.jpa..*" />
 			
 
 		</weaver>
