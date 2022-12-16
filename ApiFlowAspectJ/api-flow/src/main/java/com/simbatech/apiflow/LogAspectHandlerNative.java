@@ -50,10 +50,12 @@ public class LogAspectHandlerNative {
 	private static final String otherAspect = " && execution(* " + basePkg + "..*.wrapper..*.*(..)) && execution(* "
 			+ basePkg + "..*.wrapper1..*.*(..))";
 
-	private static final String controllerAspect = "execution(* " + basePkg + "..*.controller.*.*(..))" + " || "
-			+ "execution(* " + basePkg + "..*.controllers.*.*(..))";
-	private static final String serviceAspect = "call(* " + basePkg + "..*.service.*.*(..))" + " || " + "execution(* "
-			+ basePkg + "..*.services.*.*(..))";
+	private static final String controllerAspect = "execution(* " + basePkg + ".controller.*.*(..))" + " || "
+			+ "execution(* " + basePkg + "..*.controller.*.*(..))" + " || " + "execution(* " + basePkg
+			+ ".controllers.*.*(..))" + " || " + "execution(* " + basePkg + "..*.controllers.*.*(..))";
+	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* "
+			+ basePkg + "..*.service.*.*(..))" + " || " + "call(* " + basePkg + "..*.services.*.*(..))" + " || "
+			+ "call(* " + basePkg + ".services.*.*(..))";
 	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..))"
 			+ " || "
 			+ "execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
@@ -197,7 +199,7 @@ public class LogAspectHandlerNative {
 
 	}
 
-	@Around("repository()")
+	// @Around("repository()")
 	public Object logAroundRepository(ProceedingJoinPoint joinPoint) throws Throwable {
 		String css = "";
 		String paddingLeft = "0";
@@ -248,7 +250,7 @@ public class LogAspectHandlerNative {
 
 	}
 
-	@Around("httpClientPointcut()")
+	// @Around("httpClientPointcut()")
 	public Object logAroundHttpClient(ProceedingJoinPoint joinPoint) throws Throwable {
 
 		String paddingLeft = "0";
