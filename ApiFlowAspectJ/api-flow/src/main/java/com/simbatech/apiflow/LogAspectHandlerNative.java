@@ -53,9 +53,9 @@ public class LogAspectHandlerNative {
 	private static final String controllerAspect = "execution(* " + basePkg + ".controller.*.*(..))" + " || "
 			+ "execution(* " + basePkg + "..*.controller.*.*(..))" + " || " + "execution(* " + basePkg
 			+ ".controllers.*.*(..))" + " || " + "execution(* " + basePkg + "..*.controllers.*.*(..))";
-	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* "
-			+ basePkg + "..*.service.*.*(..))" + " || " + "call(* " + basePkg + "..*.services.*.*(..))" + " || "
-			+ "call(* " + basePkg + ".services.*.*(..))";
+	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* " + basePkg
+			+ "..*.service.*.*(..))" + " || " + "call(* " + basePkg + "..*.services.*.*(..))" + " || " + "call(* "
+			+ basePkg + ".services.*.*(..))";
 	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..))"
 			+ " || "
 			+ "execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
@@ -118,32 +118,35 @@ public class LogAspectHandlerNative {
 				showLog = false;
 
 			if (showLog) {
-				paddingLeft = saveFile(pLeftFile, (initPaddingLeft) + "");
+				paddingLeft = saveFile(pLeftFile, (initPaddingLeft) + "", false);
+				saveFile(lastClassMethod, "", false);
 				classMethod = String.format("%s.%s", className, methodName);// getMethodSignature(joinPoint);
 				css = String.format("padding-left:%spx;color:%s", (paddingLeft), "#000000");
 
 				log.info(String.format(
 						"htmlLog=><div style=''><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'></div>"));
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s</div>",
+						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-play'></i> %s</strong></div>",
 						css, lineNo, classMethod));
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</div>",
+						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i> %s</strong></div>",
 						css, lineNo, classMethod));
 
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
 			}
 			return result;
 		} catch (Exception e) {
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
+						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</strong></div>",
 						css, lineNo, classMethod, e.getMessage()));
 
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
 			}
 			throw e;
 		}
@@ -162,12 +165,15 @@ public class LogAspectHandlerNative {
 			MethodSignature methodSignature = (MethodSignature) joinPoint.getStaticPart().getSignature();
 			String className = joinPoint.getSignature().getDeclaringType().getSimpleName().split("\\$\\$")[0];
 			String methodName = joinPoint.getSignature().getName();
-			if (checkRepeatedClassMethod(methodSignature.toShortString()) || lineNo == 0
-					|| exceptions.contains(methodName) || methodName.contains("$"))
+			String txt = lineNo + ":" + (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + ":"
+					+ methodSignature.toShortString();
+			if (checkRepeatedClassMethod(txt) || lineNo == 0 || exceptions.contains(methodName)
+					|| methodName.contains("$"))
 				showLog = false;
 
 			if (showLog) {
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) + paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
+						false);
 				// classMethod = String.format("%s
 				// %s.%s",Modifier.toString(joinPoint.getSignature().getModifiers()), className,
 				// methodName);// getMethodSignature(joinPoint);
@@ -176,30 +182,32 @@ public class LogAspectHandlerNative {
 				css = String.format("padding-left:%spx;color:%s", (paddingLeft),
 						String.format("#%06x", new Random().nextInt(0xffffff + 1)));
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s</div>",
-						css, lineNo, classMethod));
+						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s  Line#%s</div>",
+						css, lineNo, classMethod,lineNo));
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</div>",
 						css, lineNo, classMethod));
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
 			}
 			return result;
 		} catch (Exception e) {
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
+						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
 						css, lineNo, classMethod, e.getMessage()));
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
 			}
 			throw e;
 		}
 
 	}
 
-	// @Around("repository()")
+	@Around("repository()")
 	public Object logAroundRepository(ProceedingJoinPoint joinPoint) throws Throwable {
 		String css = "";
 		String paddingLeft = "0";
@@ -219,7 +227,8 @@ public class LogAspectHandlerNative {
 
 			if (showLog) {
 
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) + paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
+						false);
 				css = String.format("padding-left:%spx;color:%s", (paddingLeft),
 						String.format("#%06x", new Random().nextInt(0xffffff + 1)));
 				classMethod = String.format("%s %s.%s[%s]", Modifier.toString(joinPoint.getSignature().getModifiers()),
@@ -235,7 +244,8 @@ public class LogAspectHandlerNative {
 				// "htmlLog=><div style='%s' title='Class.method[Entity] line#%s'> <i class='fa
 				// fa-database'> %s</i></div>",
 				// css, lineNo, classMethod));
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
 			}
 			return result;
 		} catch (Exception e) {
@@ -243,14 +253,15 @@ public class LogAspectHandlerNative {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method[Entity] line#%s'><i class='fa fa-database'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i>  %s...err=%s</div>",
 						css, lineNo, classMethod, e.getMessage()));
-				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
 			}
 			throw e;
 		}
 
 	}
 
-	// @Around("httpClientPointcut()")
+	@Around("httpClientPointcut()")
 	public Object logAroundHttpClient(ProceedingJoinPoint joinPoint) throws Throwable {
 
 		String paddingLeft = "0";
@@ -262,7 +273,8 @@ public class LogAspectHandlerNative {
 			Object[] args = joinPoint.getArgs();
 			if (args.length > 0)
 				url = args[0].toString();
-			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) + paddingLeftIncr) + "");
+			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
+					false);
 			css = String.format("padding-left:%spx;color:%s", (paddingLeft), "#0000ff");
 			log.info(String.format("htmlLog=><div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> %s</div>",
 					css, lineNo, url));
@@ -272,14 +284,16 @@ public class LogAspectHandlerNative {
 			// %s</div>",
 			// css, lineNo, url));
 
-			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+					false);
 			return result;
 		} catch (Exception e) {
 			log.info(String.format(
 					"htmlLog=><div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
 					css, lineNo, url, e.getMessage()));
 
-			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile)) - paddingLeftIncr) + "");
+			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+					false);
 
 			throw e;
 		}
@@ -372,11 +386,11 @@ public class LogAspectHandlerNative {
 	}
 
 	private boolean checkRepeatedClassMethod(String classMethod) {
-		if (classMethod.equals(readFile(lastClassMethod))) {
+		if (readFile(lastClassMethod, true).contains(classMethod)) {
 
 			return true;
 		} else {
-			saveFile(lastClassMethod, classMethod);
+			saveFile(lastClassMethod, classMethod, true);
 			return false;
 		}
 	}
@@ -426,8 +440,8 @@ public class LogAspectHandlerNative {
 	 * }
 	 */
 
-	public String saveFile(String file, String data) {
-		try (FileWriter fw = new FileWriter(file)) {
+	public String saveFile(String file, String data, boolean writeFresh) {
+		try (FileWriter fw = new FileWriter(file, writeFresh)) {
 			fw.write(data);
 		} catch (Exception e) {
 			System.out.println(e);
@@ -436,15 +450,15 @@ public class LogAspectHandlerNative {
 
 	}
 
-	public String readFile(String file) {
+	public String readFile(String file, boolean allLines) {
 
 		List<String> lines = Collections.emptyList();
 		try {
 			if (!new File(file).exists()) {
 				if (pLeftFile.equals(file))
-					saveFile(file, initPaddingLeft + "");
+					saveFile(file, initPaddingLeft + "", false);
 				if (lastClassMethod.equals(file))
-					saveFile(file, null);
+					saveFile(file, null, false);
 			}
 
 			lines = Files.readAllLines(Paths.get(file), StandardCharsets.UTF_8);
@@ -452,6 +466,9 @@ public class LogAspectHandlerNative {
 		} catch (Exception fe) {
 			System.out.println("File not found");
 		}
+		// if(allLines)
+		// return lines.toString();
+
 		return (lines != null && lines.size() > 0 && StringUtils.hasLength(lines.get(0))) ? (lines.get(0)) : "0";
 	}
 }
