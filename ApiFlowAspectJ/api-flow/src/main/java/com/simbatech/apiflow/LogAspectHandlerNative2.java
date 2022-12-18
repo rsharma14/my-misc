@@ -39,13 +39,13 @@ Refer README.md to integrate api-flow in main service/project
 */
 
 @Aspect
-public class LogAspectHandlerNative {
-	private static final Logger log = LoggerFactory.getLogger(LogAspectHandlerNative.class);;
+public class LogAspectHandlerNative2 {
+	private static final Logger log = LoggerFactory.getLogger(LogAspectHandlerNative2.class);;
 
 	int initPaddingLeft = 10;
 	int paddingLeftIncr = 15;
 
-	private static final String basePkg = "com";
+	private static final String basePkg = "com.ctl.bmp.service.catalog_service";
 	private static final String excludePkgs = " && !execution(* *.dto..*.*(..)) && !execution(* *.pojo..*.*(..)) && !execution(* *.repo..*.*(..)) && !execution(* *.error..*.*(..))";
 	private static final String otherAspect = " && execution(* " + basePkg + "..*.wrapper..*.*(..)) && execution(* "
 			+ basePkg + "..*.wrapper1..*.*(..))";
@@ -72,7 +72,7 @@ public class LogAspectHandlerNative {
 	@Value("${serviceAspect}")
 	private String enabled;
 
-	public LogAspectHandlerNative() throws Exception {
+	public LogAspectHandlerNative2() throws Exception {
 		try {
 			prop.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties"));
 			log.info("controllerAspect=" + controllerAspect);
@@ -121,20 +121,21 @@ public class LogAspectHandlerNative {
 				paddingLeft = saveFile(pLeftFile, (initPaddingLeft) + "", false);
 				saveFile(lastClassMethod, "", false);
 				classMethod = String.format("%s.%s", className, methodName);// getMethodSignature(joinPoint);
-				css = String.format("padding-left:%spx;color:%s", (paddingLeft), "#000000");
+				css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft), "#000000");
+				log.info(
+						"htmlLog=><head> <meta name='viewport' content='width=device-width, initial-scale=1'> <link rel='stylesheet' 	href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'> <style> ul, #myUL { 	list-style-type: none; 	padding-inline-start: 0px; }  #myUL { 	margin: 0; 	padding: 0; }  .caret { 	cursor: pointer; }  </style> </head>");
 
 				log.info(String.format(
-						"htmlLog=><div style=''><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'></div>"));
-				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-play'></i> %s</strong></div>",
+						"htmlLog=><ul id='myUL'><li><span class='caret' style='%s' title='Class.method line#%s'><strong><i class='fa fa-play'></i> %s</strong></span>",
 						css, lineNo, classMethod));
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i> %s</strong></div>",
+						"htmlLog=><li style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i> %s</strong></li></li></ul>",
 						css, lineNo, classMethod));
-
+				log.info(
+						"htmlLog=><script> 	var toggler = document.getElementsByClassName('caret'); 	var i; 	for (i = 0; i < toggler.length; i++) { 	 	toggler[i].addEventListener('click', function() { 	let rgbaChild=this.style.color.replaceAll(')','').split(','); 	let rgbaParent=this.closest('ul').style.backgroundColor.split(','); if(rgbaParent?.length==4){ this.closest('ul').style.backgroundColor=''; this.closest('ul').style.border='';  }else if(rgbaChild?.length==3){ rgbaChild.push(0.1+')'); 	this.closest('ul').style.backgroundColor=rgbaChild.toString(); 	this.closest('ul').style.border='1px dashed '+this.style.color;  } 		  }); 	  } </script>");
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -142,7 +143,7 @@ public class LogAspectHandlerNative {
 		} catch (Exception e) {
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</strong></div>",
+						"htmlLog=><li style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</strong></li></li></ul>",
 						css, lineNo, classMethod, e.getMessage()));
 
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
@@ -174,22 +175,20 @@ public class LogAspectHandlerNative {
 			if (showLog) {
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
 						false);
-				// classMethod = String.format("%s
-				// %s.%s",Modifier.toString(joinPoint.getSignature().getModifiers()), className,
-				// methodName);// getMethodSignature(joinPoint);
 				classMethod = String.format("%s %s.%s", Modifier.toString(joinPoint.getSignature().getModifiers()),
 						className, methodName);
-				css = String.format("padding-left:%spx;color:%s", (paddingLeft),
+				css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft),
 						String.format("#%06x", new Random().nextInt(0xffffff + 1)));
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s  Line#%s</div>",
-						css, lineNo, classMethod,lineNo));
+						"htmlLog=><ul class='nested'><li><span  class='caret' style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s  Line#%s</span>",
+						css, lineNo, classMethod, lineNo));
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</div>",
+						"htmlLog=><li style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</li></li></ul>",
 						css, lineNo, classMethod));
+
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -197,7 +196,7 @@ public class LogAspectHandlerNative {
 		} catch (Exception e) {
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
+						"htmlLog=><li style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</li></li></ul>",
 						css, lineNo, classMethod, e.getMessage()));
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
@@ -229,21 +228,17 @@ public class LogAspectHandlerNative {
 
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
 						false);
-				css = String.format("padding-left:%spx;color:%s", (paddingLeft),
+				css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft),
 						String.format("#%06x", new Random().nextInt(0xffffff + 1)));
 				classMethod = String.format("%s %s.%s[%s]", Modifier.toString(joinPoint.getSignature().getModifiers()),
 						map.get("repoClass"), map.get("rmethod"), map.get("entity"));// getMethodSignature(joinPoint);
 
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method[Entity] line#%s'> <i class='fa fa-database'> %s</i></div>",
+						"htmlLog=><li><span style='%s' title='Class.method[Entity] line#%s'> <i class='fa fa-database'> %s</i></span></li>",
 						css, lineNo, classMethod));
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
-				// log.info(String.format(
-				// "htmlLog=><div style='%s' title='Class.method[Entity] line#%s'> <i class='fa
-				// fa-database'> %s</i></div>",
-				// css, lineNo, classMethod));
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -251,7 +246,7 @@ public class LogAspectHandlerNative {
 		} catch (Exception e) {
 			if (showLog) {
 				log.info(String.format(
-						"htmlLog=><div style='%s' title='Class.method[Entity] line#%s'><i class='fa fa-database'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i>  %s...err=%s</div>",
+						"htmlLog=><li><span style='%s' title='Class.method[Entity] line#%s'><i class='fa fa-database'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i>  %s...err=%s</span></li>",
 						css, lineNo, classMethod, e.getMessage()));
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
@@ -275,12 +270,13 @@ public class LogAspectHandlerNative {
 				url = args[0].toString();
 			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
 					false);
-			css = String.format("padding-left:%spx;color:%s", (paddingLeft), "#0000ff");
-			log.info(String.format("htmlLog=><div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> %s</div>",
+			css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft), "#0000ff");
+			log.info(String.format(
+					"htmlLog=><li><span style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> %s</span></li>",
 					css, lineNo, url));
 			Object result = joinPoint.proceed();
 			// log.info(String.format(
-			// "htmlLog=><div style='%s' title='API line#%s'><i class='fa fa-cloud'></i>
+			// "htmlLog=><span style='%s' title='API line#%s'><i class='fa fa-cloud'></i>
 			// %s</div>",
 			// css, lineNo, url));
 
@@ -289,7 +285,7 @@ public class LogAspectHandlerNative {
 			return result;
 		} catch (Exception e) {
 			log.info(String.format(
-					"htmlLog=><div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
+					"htmlLog=><li><span style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</span></li>",
 					css, lineNo, url, e.getMessage()));
 
 			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
@@ -471,29 +467,30 @@ public class LogAspectHandlerNative {
 
 		return (lines != null && lines.size() > 0 && StringUtils.hasLength(lines.get(0))) ? (lines.get(0)) : "0";
 	}
+	
+	class ExtractBean {
+		private String entityName;
+		private Object metadata;
 
-class ExtractBean {
-	private String entityName;
-	private Object metadata;
+		public String getEntityName() {
+			return entityName;
+		}
 
-	public String getEntityName() {
-		return entityName;
+		public void setEntityName(String entityName) {
+			this.entityName = entityName;
+		}
+
+		public Object getMetadata() {
+			return metadata;
+		}
+
+		public void setMetadata(Object metadata) {
+			this.metadata = metadata;
+		}
+
 	}
-
-	public void setEntityName(String entityName) {
-		this.entityName = entityName;
-	}
-
-	public Object getMetadata() {
-		return metadata;
-	}
-
-	public void setMetadata(Object metadata) {
-		this.metadata = metadata;
-	}
-
 }
-}
+
 
 
 /*
