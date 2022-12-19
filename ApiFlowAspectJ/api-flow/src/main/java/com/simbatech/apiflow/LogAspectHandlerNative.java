@@ -2,12 +2,15 @@ package com.simbatech.apiflow;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,31 +45,32 @@ Refer README.md to integrate api-flow in main service/project
 public class LogAspectHandlerNative {
 	private static final Logger log = LoggerFactory.getLogger(LogAspectHandlerNative.class);;
 
-	int initPaddingLeft = 10;
-	int paddingLeftIncr = 15;
+	private static final int initPaddingLeft = 10;
+	private static final int paddingLeftIncr = 15;
 
-	private static final String basePkg = "com";
-	private static final String excludePkgs = " && !execution(* *.dto..*.*(..)) && !execution(* *.pojo..*.*(..)) && !execution(* *.repo..*.*(..)) && !execution(* *.error..*.*(..))";
-	private static final String otherAspect = " && execution(* " + basePkg + "..*.wrapper..*.*(..)) && execution(* "
-			+ basePkg + "..*.wrapper1..*.*(..))";
+	private static final String basePkg = "com.spring";
+	private static final String excludePkgs = " && !execution(* *.dto.*.*(..)) && !execution(* *.dto..*.*(..)) && !execution(* *.pojo.*.*(..)) && !execution(* *.pojo..*.*(..))  && !execution(* *.entity.*.*(..)) && !execution(* *.entity..*.*(..)) && !execution(* *.model.*.*(..)) && !execution(* *.model..*.*(..)) && !execution(* *.error.*.*(..)) && !execution(* *.error..*.*(..)) && !execution(* *.errors.*.*(..)) && !execution(* *.errors..*.*(..)) ";
+
+	private static final String otherServiceAspect = " || call(* " + basePkg + "..*.wrapper.*.*(..)) || call(* "
+			+ basePkg + "..*.wrapper1.*.*(..))";
 
 	private static final String controllerAspect = "execution(* " + basePkg + ".controller.*.*(..))" + " || "
 			+ "execution(* " + basePkg + "..*.controller.*.*(..))" + " || " + "execution(* " + basePkg
 			+ ".controllers.*.*(..))" + " || " + "execution(* " + basePkg + "..*.controllers.*.*(..))";
+
 	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* " + basePkg
 			+ "..*.service.*.*(..))" + " || " + "call(* " + basePkg + "..*.services.*.*(..))" + " || " + "call(* "
-			+ basePkg + ".services.*.*(..))";
-	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..))"
-			+ " || "
-			+ "execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
+			+ basePkg + ".services.*.*(..))" + otherServiceAspect + excludePkgs;
 
-	private static final String defaultAspect = "com.nothing";
+	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..)) || execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
+	private static final String SimpleJpaRepository = "org.springframework.data.jpa.repository.support.SimpleJpaRepository";
+	private static final String SimpleMongoRepository = "org.springframework.data.mongodb.repository.support.SimpleMongoRepository";
+
 	private static final String httpClientAspect = "execution(* org.springframework.web.client.RestTemplate.exchange*(..)) || execution(* org.springframework.web.client.RestTemplate.*ForObject(..)) || execution(* org.springframework.web.client.RestTemplate.*ForEntity(..)) || execution(* org.springframework.web.reactive.function.client.WebClient.*(..))";
 
 	private static final String pLeftFile = "pleft.txt";
 	private static final String lastClassMethod = "lastClassMethod.txt";
-	private static final String SimpleJpaRepository = "org.springframework.data.jpa.repository.support.SimpleJpaRepository";
-	private static final String SimpleMongoRepository = "org.springframework.data.mongodb.repository.support.SimpleMongoRepository";
+	private static final String apiFLowFile = "api-flow_#.html";
 
 	Properties prop = new Properties();
 	@Value("${serviceAspect}")
@@ -114,6 +118,7 @@ public class LogAspectHandlerNative {
 		int lineNo = joinPoint.getSourceLocation().getLine();
 
 		try {
+			saveFile(apiFLowFile, "", false);
 			if (exceptions.contains(methodName) || methodName.contains("$"))
 				showLog = false;
 
@@ -128,6 +133,13 @@ public class LogAspectHandlerNative {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-play'></i> %s</strong></div>",
 						css, lineNo, classMethod));
+
+				saveFile(apiFLowFile, String.format(
+						"<div style=''><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'></div>")
+						+ String.format(
+								"\n<div style='%s' title='Class.method line#%s'><strong><i class='fa fa-play'></i> %s</strong></div>",
+								css, lineNo, classMethod),
+						true);
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
@@ -135,6 +147,10 @@ public class LogAspectHandlerNative {
 						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i> %s</strong></div>",
 						css, lineNo, classMethod));
 
+				saveFile(apiFLowFile, String.format(
+						"\n<div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i> %s</strong></div>",
+						css, lineNo, classMethod), true);
+				renameFile(apiFLowFile, apiFLowFile.replace("#", classMethod));
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -144,7 +160,9 @@ public class LogAspectHandlerNative {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</strong></div>",
 						css, lineNo, classMethod, e.getMessage()));
-
+				saveFile(apiFLowFile, String.format(
+						"\n<div style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</strong></div>",
+						css, lineNo, classMethod, e.getMessage()), true);
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -183,13 +201,21 @@ public class LogAspectHandlerNative {
 						String.format("#%06x", new Random().nextInt(0xffffff + 1)));
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s  Line#%s</div>",
-						css, lineNo, classMethod,lineNo));
+						css, lineNo, classMethod, lineNo));
+				saveFile(apiFLowFile, String.format(
+						"\n<div style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s  Line#%s</div>",
+						css, lineNo, classMethod, lineNo), true);
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</div>",
 						css, lineNo, classMethod));
+				saveFile(apiFLowFile,
+						String.format(
+								"\n<div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</div>",
+								css, lineNo, classMethod),
+						true);
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -199,6 +225,9 @@ public class LogAspectHandlerNative {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
 						css, lineNo, classMethod, e.getMessage()));
+				saveFile(apiFLowFile, String.format(
+						"\n<div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
+						css, lineNo, classMethod, e.getMessage()), true);
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -237,6 +266,9 @@ public class LogAspectHandlerNative {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method[Entity] line#%s'> <i class='fa fa-database'> %s</i></div>",
 						css, lineNo, classMethod));
+				saveFile(apiFLowFile, String.format(
+						"\n<div style='%s' title='Class.method[Entity] line#%s'> <i class='fa fa-database'> %s</i></div>",
+						css, lineNo, classMethod), true);
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
@@ -253,6 +285,9 @@ public class LogAspectHandlerNative {
 				log.info(String.format(
 						"htmlLog=><div style='%s' title='Class.method[Entity] line#%s'><i class='fa fa-database'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i>  %s...err=%s</div>",
 						css, lineNo, classMethod, e.getMessage()));
+				saveFile(apiFLowFile, String.format(
+						"\n<div style='%s' title='Class.method[Entity] line#%s'><i class='fa fa-database'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i>  %s...err=%s</div>",
+						css, lineNo, classMethod, e.getMessage()), true);
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -278,6 +313,10 @@ public class LogAspectHandlerNative {
 			css = String.format("padding-left:%spx;color:%s", (paddingLeft), "#0000ff");
 			log.info(String.format("htmlLog=><div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> %s</div>",
 					css, lineNo, url));
+			saveFile(apiFLowFile,
+					String.format("\n<div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> %s</div>", css,
+							lineNo, url),
+					true);
 			Object result = joinPoint.proceed();
 			// log.info(String.format(
 			// "htmlLog=><div style='%s' title='API line#%s'><i class='fa fa-cloud'></i>
@@ -291,7 +330,9 @@ public class LogAspectHandlerNative {
 			log.info(String.format(
 					"htmlLog=><div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
 					css, lineNo, url, e.getMessage()));
-
+			saveFile(apiFLowFile, String.format(
+					"\n<div style='%s'  title='API line#%s'><i class='fa fa-cloud'></i> <i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
+					css, lineNo, url, e.getMessage()), true);
 			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 					false);
 
@@ -472,29 +513,42 @@ public class LogAspectHandlerNative {
 		return (lines != null && lines.size() > 0 && StringUtils.hasLength(lines.get(0))) ? (lines.get(0)) : "0";
 	}
 
-class ExtractBean {
-	private String entityName;
-	private Object metadata;
+	private boolean renameFile(String source, String target) {
 
-	public String getEntityName() {
-		return entityName;
+		try {
+
+			Files.move(Paths.get(source), Paths.get(target), StandardCopyOption.REPLACE_EXISTING);
+			return true;
+
+		} catch (IOException e) {
+			log.error("htmlLog=>" + e.getMessage());
+		}
+
+		return false;
 	}
 
-	public void setEntityName(String entityName) {
-		this.entityName = entityName;
-	}
+	class ExtractBean {
+		private String entityName;
+		private Object metadata;
 
-	public Object getMetadata() {
-		return metadata;
-	}
+		public String getEntityName() {
+			return entityName;
+		}
 
-	public void setMetadata(Object metadata) {
-		this.metadata = metadata;
-	}
+		public void setEntityName(String entityName) {
+			this.entityName = entityName;
+		}
 
+		public Object getMetadata() {
+			return metadata;
+		}
+
+		public void setMetadata(Object metadata) {
+			this.metadata = metadata;
+		}
+
+	}
 }
-}
-
 
 /*
  * @Around("repository2()") public Object

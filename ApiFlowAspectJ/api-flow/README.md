@@ -17,7 +17,7 @@
   -javaagent:ASPECTJWEAVER_JAR_PATH  
 
 NB:see aspect weave log before spring app started.
-
+==>open generated file api-flow_*.html
 ###---2---###
 NB:Before hitting api clean log file to get specific log info.
 
