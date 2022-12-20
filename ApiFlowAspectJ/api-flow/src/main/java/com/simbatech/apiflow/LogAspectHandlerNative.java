@@ -175,6 +175,7 @@ public class LogAspectHandlerNative {
 	public Object logAroundService(ProceedingJoinPoint joinPoint) throws Throwable {
 		String css = "";
 		boolean showLog = true;
+		boolean isRepeated = false;
 		String classMethod = null;
 		String paddingLeft = "0";
 		int lineNo = joinPoint.getSourceLocation().getLine();
@@ -185,9 +186,16 @@ public class LogAspectHandlerNative {
 			String methodName = joinPoint.getSignature().getName();
 			String txt = lineNo + ":" + (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + ":"
 					+ methodSignature.toShortString();
-			if (checkRepeatedClassMethod(txt) || lineNo == 0 || exceptions.contains(methodName)
-					|| methodName.contains("$"))
+			if (checkRepeatedClassMethod(txt)) {
 				showLog = false;
+				isRepeated = true;
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
+						false);
+			}
+			if (lineNo == 0 || exceptions.contains(methodName) || methodName.contains("$")) {
+				showLog = false;
+			}
+
 
 			if (showLog) {
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
@@ -219,6 +227,10 @@ public class LogAspectHandlerNative {
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
+			if (isRepeated) {
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
+			}
 			return result;
 		} catch (Exception e) {
 			if (showLog) {
@@ -228,6 +240,10 @@ public class LogAspectHandlerNative {
 				saveFile(apiFLowFile, String.format(
 						"\n<div style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i><i class='fa fa-exclamation-triangle' style='color:red;'></i> %s...err=%s</div>",
 						css, lineNo, classMethod, e.getMessage()), true);
+				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
+						false);
+			}
+			if (isRepeated) {
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
