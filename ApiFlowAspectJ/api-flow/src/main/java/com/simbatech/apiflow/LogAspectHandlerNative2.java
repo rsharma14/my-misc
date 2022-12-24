@@ -51,7 +51,7 @@ public class LogAspectHandlerNative2 {
 	private static final int paddingLeftIncr = 15;
 
 	private static final String basePkg = "com.spring";
-	private static final String excludePkgs = " && !execution(* *.dao.*.*(..))  && !execution(* *.daos.*.*(..)) && !execution(* *.dto.*.*(..)) && !execution(* *.dto..*.*(..)) && !execution(* *.pojo.*.*(..)) && !execution(* *.pojo..*.*(..))  && !execution(* *.entity.*.*(..)) && !execution(* *.entity..*.*(..)) && !execution(* *.model.*.*(..)) && !execution(* *.model..*.*(..)) && !execution(* *.error.*.*(..)) && !execution(* *.error..*.*(..)) && !execution(* *.errors.*.*(..)) && !execution(* *.errors..*.*(..)) ";
+	private static final String excludePkgs = " && !call(* *..dto..*(..))  && !call(* *..pojo..*(..))  && !call(* *..entity..*(..))  && !call(* *..model..*(..))  && !call(* *..error..*(..))";
 
 	private static final String otherServiceAspect = " || call(* " + basePkg + "..*.wrapper.*.*(..)) || call(* "
 			+ basePkg + "..*.wrapper1.*.*(..))";
@@ -60,8 +60,8 @@ public class LogAspectHandlerNative2 {
 			+ "execution(* " + basePkg + "..*.controller.*.*(..))" + " || " + "execution(* " + basePkg
 			+ ".controllers.*.*(..))" + " || " + "execution(* " + basePkg + "..*.controllers.*.*(..))";
 
-	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* " + basePkg + "..*.service.*.*(..))" + " || " + "call(* " + basePkg + ".*.services.*.*(..))" + " || " + "call(* "	+ basePkg + "..services.*.*(..))" + otherServiceAspect + excludePkgs;
-	//private static final String serviceAspect = "call(* " + basePkg + ".*(..))" + excludePkgs ;
+//	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* " + basePkg + "..*.service.*.*(..))" + " || " + "call(* " + basePkg + ".*.services.*.*(..))" + " || " + "call(* "	+ basePkg + "..services.*.*(..))" + otherServiceAspect + excludePkgs;
+	private static final String serviceAspect = "call(* " + basePkg + "..*(..))" + excludePkgs ;
 	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..)) || execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
 	private static final String SimpleJpaRepository = "org.springframework.data.jpa.repository.support.SimpleJpaRepository";
 	private static final String SimpleMongoRepository = "org.springframework.data.mongodb.repository.support.SimpleMongoRepository";
@@ -131,6 +131,7 @@ public class LogAspectHandlerNative2 {
 				classMethod = String.format("%s.%s", className, methodName);// getMethodSignature(joinPoint);
 				css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft), "#000000");
 				//log.info("htmlLog=><head> <meta name='viewport' content='width=device-width, initial-scale=1'> <link rel='stylesheet' 	href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'> <style> ul, #myUL { 	list-style-type: none; 	padding-inline-start: 0px; }  #myUL { 	margin: 0; 	padding: 0; }  .caret { 	cursor: pointer; }  </style> </head>");
+				//saveFile(apiFLowFile, serviceAspect+"\n\n",true);
 
 				//log.info(String.format("htmlLog=><ul id='myUL'><li><span class='caret' style='%s' title='Class.method line#%s'><strong><i class='fa fa-play'></i> %s</strong></span>",css, lineNo, classMethod));
 				saveFile(apiFLowFile, String.format(
