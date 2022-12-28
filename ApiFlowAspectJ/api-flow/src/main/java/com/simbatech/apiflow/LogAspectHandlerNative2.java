@@ -22,7 +22,6 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -51,8 +50,14 @@ public class LogAspectHandlerNative2 {
 	private static final int paddingLeftIncr = 15;
 
 	private static final String basePkg = "com.spring";
-	private static final String excludePkgs = " && !call(* *..dto..*(..))  && !call(* *..pojo..*(..))  && !call(* *..entity..*(..))  && !call(* *..model..*(..))  && !call(* *..error..*(..))";
+	private static final String excludePkgs = " && !call(* *..*dto*..*(..))  && !call(* *..*pojo*..*(..))  && !call(* *..*entity*..*(..))  && !call(* *..*model*..*(..))  && !call(* *..*error*..*(..))";
+	//TBD
+	private static final String excludeAnnotations = " && !within(@org.springframework.data.mongodb.core.mapping.Document *)"
+			+" && !execution(@org.springframework.data.mongodb.core.mapping.Document * *(..))"
+			+" && !call(@org.springframework.data.mongodb.core.mapping.Document * *(..))"
+			+" && !@annotation(org.springframework.data.mongodb.core.mapping.Document)"
 
+			;
 	private static final String otherServiceAspect = " || call(* " + basePkg + "..*.wrapper.*.*(..)) || call(* "
 			+ basePkg + "..*.wrapper1.*.*(..))";
 
@@ -61,7 +66,7 @@ public class LogAspectHandlerNative2 {
 			+ ".controllers.*.*(..))" + " || " + "execution(* " + basePkg + "..*.controllers.*.*(..))";
 
 //	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* " + basePkg + "..*.service.*.*(..))" + " || " + "call(* " + basePkg + ".*.services.*.*(..))" + " || " + "call(* "	+ basePkg + "..services.*.*(..))" + otherServiceAspect + excludePkgs;
-	private static final String serviceAspect = "call(* " + basePkg + "..*(..))" + excludePkgs ;
+	private static final String serviceAspect = "call(* " + basePkg + "..*(..))" + excludePkgs+excludeAnnotations ;
 	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..)) || execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
 	private static final String SimpleJpaRepository = "org.springframework.data.jpa.repository.support.SimpleJpaRepository";
 	private static final String SimpleMongoRepository = "org.springframework.data.mongodb.repository.support.SimpleMongoRepository";
@@ -543,14 +548,11 @@ public class LogAspectHandlerNative2 {
 	}
 
 	private static boolean deleteFile(String file) {
-		File f = new File(file);
 		try {
-			FileUtils.forceDelete(new File(file));
-			return true;
+			return Files.deleteIfExists(Paths.get(file));
 
 		} catch (Exception e) {
 			log.error("deleteFile file=" + file + " err=>" + e.getMessage());
-
 		}
 
 		return false;
