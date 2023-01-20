@@ -7,4 +7,4 @@ Chrome==C:\Program Files (x86)\Google\Chrome\Application\chrome.exe==true
 Firefox==C:\Program Files\Mozilla Firefox\firefox.exe==true
 OUTLOOK==C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE==true
 MSTeams==C:\Users\ac49999\AppData\Local\Microsoft\Teams\current\Teams.exe==true
-Folder==explorer.exe,C:\\Users\\ac49999\\Rajendra==true
+Folder==explorer.exe,C:\Users\ac49999\Rajendra==true
