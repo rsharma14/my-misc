@@ -51,12 +51,12 @@ public class LogAspectHandlerNative2 {
 
 	private static final String basePkg = "com.spring";
 	private static final String excludePkgs = " && !call(* *..*dto*..*(..))  && !call(* *..*pojo*..*(..))  && !call(* *..*entity*..*(..))  && !call(* *..*model*..*(..))  && !call(* *..*error*..*(..))";
+	private static final String excludePkgsCustom ="";
 	//TBD
 	private static final String excludeAnnotations = " && !within(@org.springframework.data.mongodb.core.mapping.Document *)"
 			+" && !execution(@org.springframework.data.mongodb.core.mapping.Document * *(..))"
 			+" && !call(@org.springframework.data.mongodb.core.mapping.Document * *(..))"
 			+" && !@annotation(org.springframework.data.mongodb.core.mapping.Document)"
-
 			;
 	private static final String otherServiceAspect = " || call(* " + basePkg + "..*.wrapper.*.*(..)) || call(* "
 			+ basePkg + "..*.wrapper1.*.*(..))";
@@ -66,7 +66,7 @@ public class LogAspectHandlerNative2 {
 			+ ".controllers.*.*(..))" + " || " + "execution(* " + basePkg + "..*.controllers.*.*(..))";
 
 //	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* " + basePkg + "..*.service.*.*(..))" + " || " + "call(* " + basePkg + ".*.services.*.*(..))" + " || " + "call(* "	+ basePkg + "..services.*.*(..))" + otherServiceAspect + excludePkgs;
-	private static final String serviceAspect = "call(* " + basePkg + "..*(..))" + excludePkgs+excludeAnnotations ;
+	private static final String serviceAspect = "call(* " + basePkg + "..*(..))" + excludePkgs+excludePkgsCustom+excludeAnnotations ;
 	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..)) || execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
 	private static final String SimpleJpaRepository = "org.springframework.data.jpa.repository.support.SimpleJpaRepository";
 	private static final String SimpleMongoRepository = "org.springframework.data.mongodb.repository.support.SimpleMongoRepository";
@@ -273,13 +273,13 @@ public class LogAspectHandlerNative2 {
 
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
 						false);
-				css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft), getHexColor());
+				css = String.format("white-space: nowrap;font-weight: bold;padding-left:%spx;color:%s", (paddingLeft), getHexColor());
 				classMethod = String.format("%s %s.%s[%s]", Modifier.toString(joinPoint.getSignature().getModifiers()),
 						map.get("repoClass"), map.get("rmethod"), map.get("entity"));// getMethodSignature(joinPoint);
 
 				//log.info(String.format("htmlLog=><li><span style='%s' title='Class.method[Entity] line#%s'> <i class='fa fa-database'> %s</i></span></li>",	css, lineNo, classMethod));
 				saveFile(apiFLowFile, String.format(
-						"\n<li><span style='%s' title='Class.method[Entity] line#%s'> <i class='fa fa-database'> %s</i></span></li>",
+						"\n<li><span style='%s' title='Class.method[Entity] line#%s'> <i class='fa fa-database'></i>%s</span></li>",
 						css, lineNo, classMethod), true);
 			}
 			Object result = joinPoint.proceed();
@@ -330,7 +330,7 @@ public class LogAspectHandlerNative2 {
 
 			paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
 					false);
-			css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft), "#0000ff");
+			css = String.format("white-space: nowrap;font-weight: bold;padding-left:%spx;color:%s", (paddingLeft), "#0000ff");
 			// log.info(String.format("htmlLog=><li><span style='%s' title='API line#%s'><i
 			// class='fa fa-cloud'></i> %s</span></li>", css, lineNo, url));
 			saveFile(apiFLowFile,
