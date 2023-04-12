@@ -49,9 +49,18 @@ public class LogAspectHandlerNative2 {
 	private static final int initPaddingLeft = 10;
 	private static final int paddingLeftIncr = 15;
 
-	private static final String basePkg = "com.spring";
-	private static final String excludePkgs = " && !call(* *..*dto*..*(..))  && !call(* *..*pojo*..*(..))  && !call(* *..*entity*..*(..))  && !call(* *..*model*..*(..))  && !call(* *..*error*..*(..))";
-	private static final String excludePkgsCustom ="";
+	private static final String basePkg = "com.ctl.bmp.service.catalog_service";
+	private static final String excludePkgs = " && !call(* *..*dto*..*(..))  && !call(* *..*pojo*..*(..))  "
+			+ "&& !call(* *..*entity*..*(..))  && !call(* *..*model*..*(..))  && !call(* *..*error*..*(..))";
+	private static final String excludePkgsCustom =" && !call(* *..*daos*..*(..))  "
+			+ " && !call(* "+basePkg+"..*.helper.*.*(..))"+" && !call(* "+basePkg+"..*.helper.*.*(..))"
+			+" && !call(* "+basePkg+".catalog_db_adapter.*.*(..))"
+			+" && !call(* "+basePkg+"..*.Builder.*(..))"
+			//+" && !call(* "+basePkg+".services.wrapper..*(..))"
+			//+" && !call(* "+basePkg+".services.managers..*(..))"
+			//+" && !call(* "+basePkg+".services.ProductOfferingServiceV2.*(..))"
+			;
+	private static final String excludeCLassess =" && !call(* "+basePkg+".services.ProductOfferingServiceV2.*(..))";
 	//TBD
 	private static final String excludeAnnotations = " && !within(@org.springframework.data.mongodb.core.mapping.Document *)"
 			+" && !execution(@org.springframework.data.mongodb.core.mapping.Document * *(..))"
@@ -66,7 +75,7 @@ public class LogAspectHandlerNative2 {
 			+ ".controllers.*.*(..))" + " || " + "execution(* " + basePkg + "..*.controllers.*.*(..))";
 
 //	private static final String serviceAspect = "call(* " + basePkg + ".service.*.*(..))" + " || " + "call(* " + basePkg + "..*.service.*.*(..))" + " || " + "call(* " + basePkg + ".*.services.*.*(..))" + " || " + "call(* "	+ basePkg + "..services.*.*(..))" + otherServiceAspect + excludePkgs;
-	private static final String serviceAspect = "call(* " + basePkg + "..*(..))" + excludePkgs+excludePkgsCustom+excludeAnnotations ;
+	private static final String serviceAspect = "call(* " + basePkg + "..*(..))" + excludePkgs+excludePkgsCustom+excludeAnnotations+excludeCLassess ;
 	private static final String repositoryAspect = "execution(* org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke*(..)) || execution(* org.springframework.data.repository.core.support.RepositoryFactorySupport.QueryExecutorMethodInterceptor.invoke*(..))";
 	private static final String SimpleJpaRepository = "org.springframework.data.jpa.repository.support.SimpleJpaRepository";
 	private static final String SimpleMongoRepository = "org.springframework.data.mongodb.repository.support.SimpleMongoRepository";
@@ -122,6 +131,7 @@ public class LogAspectHandlerNative2 {
 		String classMethod = null;
 		boolean showLog = true;
 		int lineNo = joinPoint.getSourceLocation().getLine();
+		String pkg=joinPoint.getSignature().getDeclaringType().getPackage().getName();
 
 		try {
 			if (exceptions.contains(methodName) || methodName.contains("$"))
@@ -143,8 +153,8 @@ public class LogAspectHandlerNative2 {
 						"<head> <meta name='viewport' content='width=device-width, initial-scale=1'> <link rel='stylesheet' 	href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'> <style> ul, #myUL { 	list-style-type: none; 	padding-inline-start: 0px; }  #myUL { 	margin: 0; 	padding: 0; }  .caret { 	cursor: pointer; }  </style> </head>"),
 						true);
 				saveFile(apiFLowFile, String.format(
-						"\n<ul id='myUL'><li><span class='caret' style='%s' title='Class.method line#%s'><strong><i class='fa fa-play'></i> %s</strong></span>",
-						css, lineNo, classMethod), true);
+						"\n<ul id='myUL'><li><span class='caret' style='%s'title='pkg:%s | line:#%s'><strong><i class='fa fa-play'></i> %s</strong></span>",
+						css, pkg,lineNo, classMethod), true);
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
@@ -152,8 +162,8 @@ public class LogAspectHandlerNative2 {
 				//log.info("htmlLog=><script> 	var toggler = document.getElementsByClassName('caret'); 	var i; 	for (i = 0; i < toggler.length; i++) { 	 	toggler[i].addEventListener('click', function() { 	let rgbaChild=this.style.color.replaceAll(')','').split(','); 	let rgbaParent=this.closest('ul').style.backgroundColor.split(','); if(rgbaParent?.length==4){ this.closest('ul').style.backgroundColor=''; this.closest('ul').style.border='';  }else if(rgbaChild?.length==3){ rgbaChild.push(0.1+')'); 	this.closest('ul').style.backgroundColor=rgbaChild.toString(); 	this.closest('ul').style.border='1px dashed '+this.style.color;  } 		  }); 	  } </script>");
 
 				saveFile(apiFLowFile, String.format(
-						"\n<li><span  class='caret' style='%s' title='Class.method line#%s'><strong><i class='fa fa-stop'></i> %s</strong></span></li></li></ul>",
-						css, lineNo, classMethod), true);
+						"\n<li><span  class='caret' style='%s' title='pkg:%s | line:#%s'><strong><i class='fa fa-stop'></i> %s</strong></span></li></li></ul>",
+						css,pkg, lineNo, classMethod), true);
 				saveFile(apiFLowFile,
 						"\n<script> 	var toggler = document.getElementsByClassName('caret'); 	var i; 	for (i = 0; i < toggler.length; i++) { 	 	toggler[i].addEventListener('click', function() { 	let rgbaChild=this.style.color.replaceAll(')','').split(','); 	let rgbaParent=this.closest('ul').style.backgroundColor.split(','); if(rgbaParent?.length==4){ this.closest('ul').style.backgroundColor=''; this.closest('ul').style.border='';  }else if(rgbaChild?.length==3){ rgbaChild.push(0.1+')'); 	this.closest('ul').style.backgroundColor=rgbaChild.toString(); 	this.closest('ul').style.border='1px dashed '+this.style.color;  } 		  }); 	  } </script>",
 						true);
@@ -197,7 +207,8 @@ public class LogAspectHandlerNative2 {
 			String methodName = joinPoint.getSignature().getName();
 			String txt = lineNo + ":" + (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + ":"
 					+ methodSignature.toShortString();
-			
+			String pkg=joinPoint.getSignature().getDeclaringType().getPackage().getName();
+
 			if (checkRepeatedClassMethod(txt)) {
 				showLog = false;
 				isRepeated = true;
@@ -216,15 +227,15 @@ public class LogAspectHandlerNative2 {
 				css = String.format("white-space: nowrap;padding-left:%spx;color:%s", (paddingLeft), getHexColor());
 				//log.info(String.format("htmlLog=><ul class='nested'><li><span  class='caret' style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s  Line#%s</span>",css, lineNo, classMethod, lineNo));
 				saveFile(apiFLowFile, String.format(
-						"\n<ul class='nested'><li><span  class='caret' style='%s' title='Class.method line#%s'><i class='fa fa-play'></i> %s  Line#%s</span>",
-						css, lineNo, classMethod, lineNo), true);
+						"\n<ul class='nested'><li><span  class='caret' style='%s'  title='pkg:%s | line:#%s'><i class='fa fa-play'></i> %s</span>",
+						css, pkg,lineNo, classMethod), true);
 			}
 			Object result = joinPoint.proceed();
 			if (showLog) {
 				//log.info(String.format("htmlLog=><li><span  class='caret' style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</span></li></li></ul>",	css, lineNo, classMethod));
 				saveFile(apiFLowFile, String.format(
-						"\n<li><span  class='caret' style='%s' title='Class.method line#%s'><i class='fa fa-stop'></i> %s</span></li></li></ul>",
-						css, lineNo, classMethod), true);
+						"\n<li><span  class='caret' style='%s' title='pkg:%s | line:#%s'><i class='fa fa-stop'></i> %s</span></li></li></ul>",
+						css, pkg,lineNo, classMethod), true);
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) - paddingLeftIncr) + "",
 						false);
 			}
@@ -273,7 +284,7 @@ public class LogAspectHandlerNative2 {
 
 				paddingLeft = saveFile(pLeftFile, (Integer.parseInt(readFile(pLeftFile, false)) + paddingLeftIncr) + "",
 						false);
-				css = String.format("white-space: nowrap;font-weight: bold;padding-left:%spx;color:%s", (paddingLeft), getHexColor());
+				css = String.format("white-space: nowrap;font-weight: bold;padding-left:%spx;color:%s", (paddingLeft), "#000000");
 				classMethod = String.format("%s %s.%s[%s]", Modifier.toString(joinPoint.getSignature().getModifiers()),
 						map.get("repoClass"), map.get("rmethod"), map.get("entity"));// getMethodSignature(joinPoint);
 
