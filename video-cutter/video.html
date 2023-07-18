@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Video Player</title>
+  <style>
+    #video-player {
+      width: 100%;
+      height: 400px;
+
+    }
+
+    table {
+      width: 100%;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    #clipSeg {
+      height: 400px;
+      overflow-y: scroll;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      font-size: 75%;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      background-color: #000;
+      color: #fff;
+      border-radius: 1rem;
+    }
+  </style>
+</head>
+<title>My Video Clips Cutter</title>
+
+<body>
+  <h3 style="text-align: center;background-color: aquamarine;">Video Clips Cutter</h3>
+  <table>
+    <tbody>
+      <tr>
+        <td style="width: 70%;" class="center">
+          <div>
+            <span class="badge">1</span><strong> Upload Video: </strong>
+            <input type="file" id="video-upload" accept="video/*">
+            <button id="reset-button">Reset</button>
+          </div><br>
+          <div>
+            <video id="video-player" controls></video>
+          </div>
+
+        </td>
+        <td style="width: 30%;display: contents;" class="center">
+          <h3>Clip Segments</h3>
+          <div id="clipSeg"></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="center">
+          <div>
+            <span class="badge">2</span><button id="start-button">Start Clip</button>
+            <span class="badge">3</span><button id="end-button">End Clip</button>
+            <span class="badge">4</span><button id="add-button">Add Clip</button>
+          </div>
+        </td>
+        <td class="center">
+          <span class="badge">5</span><button id="save-clips">Save Clips</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="savedClipTimes"></div>
+
+
+  <script>
+    var videoPlayer = document.getElementById('video-player');
+    var startButton = document.getElementById('start-button');
+    var endButton = document.getElementById('end-button');
+    var addButton = document.getElementById('add-button');
+    var clipSeg = document.getElementById('clipSeg');
+    var saveClips = document.getElementById('save-clips');
+    var reset = document.getElementById('reset-button');
+
+    var clips = {};
+    var idx = 0;
+    var startTime, endTime;
+    var pstartTime, pendTime;
+    var startTime_, endTime_, SegStartFlag = false;
+    var currentTargetInSeg;
+
+
+    //videoPlayer.addEventListener("loadeddata",()=>{});
+
+    document.getElementById('video-upload').addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      var videoURL = URL.createObjectURL(file);
+      videoPlayer.src = videoURL;
+      document.getElementById("video-upload").disabled = true;
+    });
+    videoPlayer.addEventListener("timeupdate", () => {
+      if (SegStartFlag && videoPlayer.currentTime >= endTime_) {
+        videoPlayer.pause();
+        SegStartFlag = false;
+        currentTargetInSeg.innerHTML = "&#9658;";
+
+      }
+
+    });
+    startButton.addEventListener('click', function () {
+
+      startTime = getTime(videoPlayer.currentTime);
+      startButton.innerHTML = "Start::" + "<strong>" + startTime + "</strong>";
+      endTime = undefined;
+      endButton.innerHTML = "End Clip";
+
+    });
+    endButton.addEventListener('click', function () {
+      if (startTime) {
+        endTime = getTime(videoPlayer.currentTime);
+        endButton.innerHTML = "End::" + "<strong>" + endTime + "</strong>";
+      }
+
+    });
+    addButton.addEventListener('click', function () {
+      if ((!startTime || !endTime) || (startTime == endTime) || startTime == pstartTime && endTime == pendTime)
+        return;
+      pstartTime = startTime;
+      pendTime = endTime;
+      clips[idx++] = { startTime: startTime, endTime: endTime };
+      addInSegs();
+    });
+    clipSeg.addEventListener('click', function () {
+      var target = event.target;
+
+      if (target && target.id?.startsWith('play_')) {
+        let targetId = target.id.split("_")[1];
+
+        if (target.classList.contains("active")) {
+          document.querySelectorAll("[id^='play_']").forEach(a => {
+            a.classList.remove("active");
+          });
+        } else {
+          document.querySelectorAll("[id^='play_']").forEach(a => {
+            a.classList.remove("active");
+          });
+          target.classList.add("active");
+          videoPlayer.pause();//pause for old running one
+        }
+        document.querySelectorAll("[id^='seg_']").forEach(a => {
+          a.style.backgroundColor = null;
+        });
+        document.querySelector(`#seg_${targetId}`).style.backgroundColor = '#abedad';
+
+        document.querySelectorAll("[id^='play_']").forEach(a => {
+          a.innerHTML = "&#9658;";
+        });
+        //target.innerHTML = "&#10074;&#10074;"
+
+        currentTargetInSeg = target;
+        playVideo(target.id.split("_")[1], target);
+
+      } else if (target && target.id?.startsWith('cancel_')) {
+        delete clips[target.id.split("_")[1]];
+        addInSegs();
+
+      }
+    });
+    saveClips.addEventListener('click', function () {
+      console.log(clips);
+      let arr = [];
+      for (let i in clips) {
+        arr.push([clips[i].startTime, clips[i].endTime]);
+      }
+      document.querySelector("#savedClipTimes").innerHTML = "<div id='copyTimes'>" + JSON.stringify(arr) + "</div>";
+      copyTimes();
+    });
+    reset.addEventListener('click', function () {
+      window.location.reload();
+    });
+
+    function addInSegs() {
+      clipSeg.innerHTML = "";
+      Object.keys(clips).forEach(id => {
+        let tag = "<span id=clip_" + id + ">" + clips[id].startTime + " - " + clips[id].endTime + "</span>"
+        tag += " <button style='color:green;' id=play_" + id + ">&#9654;</button>";
+        tag += " <button style='color:red;' id=cancel_" + id + ">&#10060;</button>";
+        tag = "<div id=seg_" + id + ">" + tag + "</div>";
+
+        clipSeg.insertAdjacentHTML("beforeend", tag);
+
+      })
+
+    }
+    function playVideo(clipId, target) {
+      const st = convertTimeToSeconds(clips[clipId]['startTime']);
+      const et = convertTimeToSeconds(clips[clipId]['endTime']);
+      startTime_ = st;
+      endTime_ = et;
+
+      if (st > et) {
+        alert("Start time>End time ");
+        return;
+      }
+
+      if (videoPlayer.paused) {
+        videoPlayer.currentTime = startTime_;
+        videoPlayer.play();
+        target.innerHTML = "&#10074;&#10074;";
+        SegStartFlag = true;
+      } else {
+        videoPlayer.pause();
+        target.innerHTML = "&#9658;";
+        SegStartFlag = false;
+
+
+      }
+      console.log(st + ":" + et)
+
+    }
+
+    function getTime(playTime) {
+      var date = new Date(null);
+      date.setSeconds(playTime);
+      var timeString = date.toISOString().substr(11, 8); // Extracts HH:MM:SS from the ISO string
+
+      return timeString;
+    }
+    function convertTimeToSeconds(timeString) {
+      const [hours, minutes, seconds] = timeString.split(":");
+
+      const hoursNumber = parseInt(hours, 10);
+      const minutesNumber = parseInt(minutes, 10);
+      const secondsNumber = parseInt(seconds, 10);
+
+      return (hoursNumber * 3600 + minutesNumber * 60 + secondsNumber);
+
+    }
+    function copyTimes() {
+      if (document.selection) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(document.getElementById("copyTimes"));
+        range.select();
+      } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById("copyTimes"));
+        console.log(range)
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand("copy");
+      }
+    }
+
+
+  </script>
+</body>
+
+</html>
