@@ -33,7 +33,9 @@ for element in "${arrays[@]}"; do
         echo "ffmpeg -ss $START -to $END -i $ip_video -c copy  ~/$PAR_FOLDER/$DT/$idx$OUTPUT"
         ffmpeg -ss $START -to $END -i "$ip_video" -c copy ~/$PAR_FOLDER/$DT/$idx$OUTPUT
         ((idx++))
+		echo ""
 		echo "----------$idx clip completed----------"
+		echo ""
     fi
 done
 
