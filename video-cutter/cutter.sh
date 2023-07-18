@@ -7,9 +7,9 @@ PAR_FOLDER="Downloads"
 mkdir ~/$PAR_FOLDER/$DT
 
 read -r -p "Enter clips times in the format [[1,2],[3,2]]: " array_str
-array_str=[["00:00:00","00:00:10"],["00:00:35","00:00:48"],["00:00:52","00:01:00"]]
+#array_str=[["00:00:00","00:00:10"],["00:00:35","00:00:48"],["00:00:52","00:01:00"]]
 read -r -p "Enter video file location to be clipped: " ip_video
-ip_video="C:\Users\ac49999\git\APPS\2.MPG\my-misc\video-cutter\a.mp4"
+#ip_video="C:\Users\ac49999\git\APPS\2.MPG\my-misc\video-cutter\a.mp4"
 ip_video=$(echo $ip_video | sed 's|\\|/|g')
 
 echo "ip_video="$ip_video
