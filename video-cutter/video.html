@@ -7,7 +7,6 @@
     #video-player {
       width: 100%;
       height: 400px;
-
     }
 
     table {
@@ -36,14 +35,28 @@
       color: #fff;
       border-radius: 1rem;
     }
-	.timeField{
-	width: 30px;
-	}
+
+    .timeField {
+      width: 30px;
+    }
+
+    .segBtn {
+      height: 24px;
+      width: 24px;
+      padding: 0px;
+    }
+
+    .bkt {
+      font-weight: bold;
+      font-size: 25px;
+    }
   </style>
 </head>
 <title>My Video Clips Cutter</title>
 
 <body>
+
+
   <h3 style="text-align: center;background-color: aquamarine;">Video Clips Cutter</h3>
   <table>
     <tbody>
@@ -59,7 +72,7 @@
           </div>
 
         </td>
-        <td style="width: 30%;display: contents;" class="center">
+        <td style="width: 30%;" class="center">
           <h3>Clip Segments</h3>
           <div id="clipSeg"></div>
         </td>
@@ -67,22 +80,36 @@
       <tr>
         <td class="center">
           <div>
-            <div><span class="badge">2</span><button id="start-button">Start Clip</button>
-			 <input id="hours_0" type="number" min="0" max="99" value="00" onchange="updateTime(this,0)"  class="timeField"/>
-  :
-  <input id="minutes_0" type="number" min="0" max="59" value="00" onchange="updateTime(this,0)" class="timeField"/>
-  :
-  <input id="seconds_0" type="number" min="0" max="59" value="00" onchange="updateTime(this,0)"  class="timeField"/>
-			</div>
-            <div><span class="badge">3</span><button id="end-button">End Clip</button>
-			 <input id="hours_1" type="number" min="0" max="99" value="00" onchange="updateTime(this,1)" class="timeField" />
-  :
-  <input id="minutes_1" type="number" min="0" max="59" value="00" onchange="updateTime(this,1)"  class="timeField"/>
-  :
-  <input id="seconds_1" type="number" min="0" max="59" value="00" onchange="updateTime(this,1)"  class="timeField"/>
-			</div>
-			<div>
-            <span class="badge">4</span><button id="add-button">Add Clip</button>
+            <div style="display: flex; justify-content: center; align-items: center;">
+              <div style="display: flex; align-items: center;">
+                <span class="badge">2</span>
+              <button id="start-button" title="Start Clip"><span class="bkt">[</span></button>&nbsp;
+              <input id="hours_0" type="number" min="0" max="99" value="00" onchange="updateTime(this,0)"
+                class="timeField">
+              <span>:</span>
+              <input id="minutes_0" type="number" min="0" max="59" value="00" onchange="updateTime(this,0)"
+                class="timeField">
+              <span>:</span>
+              <input id="seconds_0" type="number" min="0" max="59" value="00" onchange="updateTime(this,0)"
+                class="timeField">
+              </div>
+              <span><strong>&nbsp;--&nbsp;</strong></span>
+              <div style="display: flex; align-items: center;">
+
+              <input id="hours_1" type="number" min="0" max="99" value="00" onchange="updateTime(this,1)"
+                class="timeField">
+              <span>:</span>
+              <input id="minutes_1" type="number" min="0" max="59" value="00" onchange="updateTime(this,1)"
+                class="timeField">
+              <span>:</span>
+              <input id="seconds_1" type="number" min="0" max="59" value="00" onchange="updateTime(this,1)"
+                class="timeField">
+                &nbsp;<button id="end-button" title="End Clip"><span class="bkt">]</span></button>
+              <span class="badge">3</span>&nbsp;&nbsp;
+            </div>
+            <div style="display: flex; align-items: center;">
+              <button id="add-button">Add Clip</button><span class="badge">4</span>
+            </div>
           </div>
           </div>
         </td>
@@ -96,30 +123,30 @@
 
 
   <script>
- function padWithZero(number) {
+    function padWithZero(number) {
       return number.toString().padStart(2, '0');
     }
 
- function updateTime(inputElement,id) {
+    function updateTime(inputElement, id) {
       var inputValue = parseInt(inputElement.value, 10);
 
       if (inputValue < 10) {
         inputElement.value = padWithZero(inputValue);
       }
 
-      var hours = padWithZero(document.getElementById('hours_'+id).value);
-      var minutes = padWithZero(document.getElementById('minutes_'+id).value);
-      var seconds = padWithZero(document.getElementById('seconds_'+id).value);
+      var hours = padWithZero(document.getElementById('hours_' + id).value);
+      var minutes = padWithZero(document.getElementById('minutes_' + id).value);
+      var seconds = padWithZero(document.getElementById('seconds_' + id).value);
 
       var formattedTime = hours + ':' + minutes + ':' + seconds;
-	  if(id==0){
-	  startTime_=formattedTime;
-	  startTimeSec_=convertTimeToSeconds(formattedTime);
-	  }	  else{
-	  endTime_=formattedTime;
-	  endTimeSec_=convertTimeToSeconds(formattedTime);
-	  }
-	  videoPlayer.currentTime=convertTimeToSeconds(formattedTime);
+      if (id == 0) {
+        startTime_ = formattedTime;
+        startTimeSec_ = convertTimeToSeconds(formattedTime);
+      } else {
+        endTime_ = formattedTime;
+        endTimeSec_ = convertTimeToSeconds(formattedTime);
+      }
+      videoPlayer.currentTime = convertTimeToSeconds(formattedTime);
     }
     var videoPlayer = document.getElementById('video-player');
     var startButton = document.getElementById('start-button');
@@ -135,7 +162,7 @@
     var pstartTime, pendTime;
     var startTimeSec_, endTimeSec_, SegStartFlag = false;
     var currentTargetInSeg;
-	var seekTime=5;
+    var seekTime = 5;
 
 
     //videoPlayer.addEventListener("loadeddata",()=>{});
@@ -146,7 +173,7 @@
       videoPlayer.src = videoURL;
       document.getElementById("video-upload").disabled = true;
     });
-	 videoPlayer.addEventListener('keydown', function(event) {
+    videoPlayer.addEventListener('keydown', function (event) {
       if (event.keyCode === 37) { // Left arrow key
         event.preventDefault();
         videoPlayer.currentTime -= seekTime; // Skip back 2 seconds
@@ -155,7 +182,7 @@
         videoPlayer.currentTime += seekTime; // Skip forward 2 seconds
       }
     });
-	
+
     videoPlayer.addEventListener("timeupdate", () => {
       if (SegStartFlag && videoPlayer.currentTime >= endTimeSec_) {
         videoPlayer.pause();
@@ -169,29 +196,21 @@
 
       startTime_ = getFormattedTime(videoPlayer.currentTime);
       startTimeSec_ = videoPlayer.currentTime;
-	  
       endTime_ = undefined;
-      endButton.innerHTML = "End Clip";
-	        document.getElementById('hours_0').value=startTime_.split(":")[0];
-      document.getElementById('minutes_0').value=startTime_.split(":")[1];
-      document.getElementById('seconds_0').value=startTime_.split(":")[2];
-
+      setHMS(0, startTime_);
 
     });
     endButton.addEventListener('click', function () {
       if (startTime_) {
         endTime_ = getFormattedTime(videoPlayer.currentTime);
         endTimeSec_ = videoPlayer.currentTime;
-        	        document.getElementById('hours_1').value=endTime_.split(":")[0];
-      document.getElementById('minutes_1').value=endTime_.split(":")[1];
-      document.getElementById('seconds_1').value=endTime_.split(":")[2];
-
-
+        setHMS(1, endTime_);
       }
 
     });
+
     addButton.addEventListener('click', function () {
-      if ((!startTime_ || !endTime_) || (startTime_ == endTime_)|| (startTimeSec_>endTimeSec_) || startTime_ == pstartTime && endTime_ == pendTime)
+      if ((!startTime_ || !endTime_) || (startTime_ == endTime_) || (startTimeSec_ > endTimeSec_) || startTime_ == pstartTime && endTime_ == pendTime)
         return;
       pstartTime = startTime_;
       pendTime = endTime_;
@@ -249,15 +268,28 @@
 
     function addInSegs() {
       clipSeg.innerHTML = "";
+      clipSeg.insertAdjacentHTML("beforeend", "<table><tbody>");
+      let tag = "";
       Object.keys(clips).forEach(id => {
-        let tag = "<span id=clip_" + id + ">" + clips[id].startTime + " - " + clips[id].endTime + "</span>"
-        tag += " <button style='color:green;' id=play_" + id + ">&#9654;</button>";
-        tag += " <button style='color:red;' id=cancel_" + id + ">&#10060;</button>";
-        tag = "<div id=seg_" + id + ">" + tag + "</div>";
+        tag += "<tr><td id=seg_" + id + ">";
+        tag += "<span id=clip_" + id + ">" + clips[id].startTime + " - " + clips[id].endTime + " [" + calculateDuration(clips[id].startTime, clips[id].endTime) + "]</span>"
+        tag += " <button class='segBtn' style='color:green;' id=play_" + id + ">&#9654;</button>";
+        tag += " <button class='segBtn' style='color:red;' id=cancel_" + id + ">&#10060;</button>";
+        tag += "</td></tr>";
+      });
+      clipSeg.insertAdjacentHTML("beforeend", "<table><tbody>" + tag + "<table><tbody>");
 
-        clipSeg.insertAdjacentHTML("beforeend", tag);
 
-      })
+    }
+    function calculateDuration(startT, endT) {
+      let inSec = convertTimeToSeconds(endT) - convertTimeToSeconds(startT);
+      return getFormattedTime(inSec);
+
+    }
+    function setHMS(id, time) {
+      document.getElementById('hours_' + id).value = time.split(":")[0];
+      document.getElementById('minutes_' + id).value = time.split(":")[1];
+      document.getElementById('seconds_' + id).value = time.split(":")[2];
 
     }
     function playVideo(clipId, target) {
