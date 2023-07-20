@@ -1,2 +1,5 @@
 MyTools/MyApps/MyApps.bat - Shortcut.lnk
 MyTools/MyApps/apps.txt
+
+video-cutter/node_modules
+video-cutter/package-lock.json

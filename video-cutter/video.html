@@ -64,9 +64,12 @@
         <td style="width: 70%;" class="center">
           <div>
             <span class="badge">1</span><strong> Upload Video: </strong>
-            <input type="file" id="video-upload" accept="video/*">
+            <input type="file" id="video-upload" accept="video/*,video/x-matroska">
             <button id="reset-button">Reset</button>
           </div><br>
+		  <div>
+		  Enter Folder path: <input type="text" id="folderName"/>
+		  </div><br>
           <div>
             <video id="video-player" controls></video>
           </div>
@@ -123,31 +126,7 @@
 
 
   <script>
-    function padWithZero(number) {
-      return number.toString().padStart(2, '0');
-    }
 
-    function updateTime(inputElement, id) {
-      var inputValue = parseInt(inputElement.value, 10);
-
-      if (inputValue < 10) {
-        inputElement.value = padWithZero(inputValue);
-      }
-
-      var hours = padWithZero(document.getElementById('hours_' + id).value);
-      var minutes = padWithZero(document.getElementById('minutes_' + id).value);
-      var seconds = padWithZero(document.getElementById('seconds_' + id).value);
-
-      var formattedTime = hours + ':' + minutes + ':' + seconds;
-      if (id == 0) {
-        startTime_ = formattedTime;
-        startTimeSec_ = convertTimeToSeconds(formattedTime);
-      } else {
-        endTime_ = formattedTime;
-        endTimeSec_ = convertTimeToSeconds(formattedTime);
-      }
-      videoPlayer.currentTime = convertTimeToSeconds(formattedTime);
-    }
     var videoPlayer = document.getElementById('video-player');
     var startButton = document.getElementById('start-button');
     var endButton = document.getElementById('end-button');
@@ -163,6 +142,7 @@
     var startTimeSec_, endTimeSec_, SegStartFlag = false;
     var currentTargetInSeg;
     var seekTime = 5;
+	var fileName;
 
 
     //videoPlayer.addEventListener("loadeddata",()=>{});
@@ -171,6 +151,7 @@
       var file = e.target.files[0];
       var videoURL = URL.createObjectURL(file);
       videoPlayer.src = videoURL;
+	  fileName=file.name;
       document.getElementById("video-upload").disabled = true;
     });
     videoPlayer.addEventListener('keydown', function (event) {
@@ -261,6 +242,7 @@
       }
       document.querySelector("#savedClipTimes").innerHTML = "<div id='copyTimes'>" + JSON.stringify(arr) + "</div>";
       copyTimes();
+	  callApi(arr);
     });
     reset.addEventListener('click', function () {
       window.location.reload();
@@ -350,8 +332,62 @@
         document.execCommand("copy");
       }
     }
+    function padWithZero(number) {
+      return number.toString().padStart(2, '0');
+    }
 
+    function updateTime(inputElement, id) {
+      var inputValue = parseInt(inputElement.value, 10);
 
+      if (inputValue < 10) {
+        inputElement.value = padWithZero(inputValue);
+      }
+
+      var hours = padWithZero(document.getElementById('hours_' + id).value);
+      var minutes = padWithZero(document.getElementById('minutes_' + id).value);
+      var seconds = padWithZero(document.getElementById('seconds_' + id).value);
+
+      var formattedTime = hours + ':' + minutes + ':' + seconds;
+      if (id == 0) {
+        startTime_ = formattedTime;
+        startTimeSec_ = convertTimeToSeconds(formattedTime);
+      } else {
+        endTime_ = formattedTime;
+        endTimeSec_ = convertTimeToSeconds(formattedTime);
+      }
+      videoPlayer.currentTime = convertTimeToSeconds(formattedTime);
+    }
+//===========================
+function callApi(data) {
+let folderName=document.querySelector("#folderName").value;
+if(!folderName){
+alert("Enter Folder full path where file is uploaded");
+return ;
+}
+      const apiUrl = 'http://localhost:3000/submit';
+      const requestData = {
+	  folderName:folderName,
+        fileName: fileName,
+		times:data
+      };
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.msg);
+        // Handle the API response data here
+      })
+      .catch(error => {
+        console.error('API Error:', error);
+        // Handle any errors that occurred during the API call
+      });
+    }
   </script>
 </body>
 
