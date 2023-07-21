@@ -57,7 +57,8 @@ function clipCut(requestData) {
   const ext = file.substring(lastDotIndex + 1);
 
   const op_folder = path.join(downloadsFolderPath, "MyVideoCutter", fn + "_" + formatDate());
-  const command = 'ffmpeg -i "INPUT_FILE" -ss START_TIME -to END_TIME  -c:v copy -c:a copy "OUTPUT_FILE"';
+  //const command = 'ffmpeg -i "INPUT_FILE" -ss START_TIME -to END_TIME  -c:v copy -c:a copy "OUTPUT_FILE"';
+  const command = 'ffmpeg -i "INPUT_FILE" -ss START_TIME -t DURATION  -c:v copy -c:a copy "OUTPUT_FILE"';
 
   fs.mkdir(op_folder, { recursive: true }, (err) => {
     if (err) {
@@ -70,7 +71,8 @@ function clipCut(requestData) {
         cmd = command
           .replace("INPUT_FILE", ip_file)
           .replace("START_TIME", time[0])
-          .replace("END_TIME", time[1])
+          //.replace("END_TIME", time[1])
+          .replace("DURATION", time[2])
           .replace("OUTPUT_FILE", path.join(op_folder, fn + ("_[" + time[0] + "-" + time[1] + "]").replaceAll(":", ".") + "." + ext));
 
         callTerminal(cmd);

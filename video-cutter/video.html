@@ -221,7 +221,7 @@
         return;
       pstartTime = startTime_;
       pendTime = endTime_;
-      clips[idx++] = { startTime: startTime_, endTime: endTime_ };
+      clips[idx++] = { startTime: startTime_, endTime: endTime_,duration:calculateDuration(startTime_, endTime_)  };
       addInSegs();
     });
     clipSeg.addEventListener('click', function () {
@@ -271,7 +271,7 @@
         return alert("Enter Folder full path where file is uploaded");
 
       for (let i in clips) {
-        arr.push([clips[i].startTime, clips[i].endTime]);
+        arr.push([clips[i].startTime, clips[i].endTime, clips[i].duration]);
       }
       //document.querySelector("#savedClipTimes").innerHTML = "<div id='copyTimes'>" + JSON.stringify(arr) + "</div>";
       //copyTimes();
@@ -292,7 +292,7 @@
       let tag = "";
       Object.keys(clips).forEach(id => {
         tag += "<tr><td id=seg_" + id + ">";
-        tag += "<span id=clip_" + id + ">" + clips[id].startTime + " - " + clips[id].endTime + " [" + calculateDuration(clips[id].startTime, clips[id].endTime) + "]</span>"
+        tag += "<span id=clip_" + id + ">" + clips[id].startTime + " - " + clips[id].endTime + " [" + clips[id].duration + "]</span>"
         tag += " <button class='segBtn' style='color:green;' id=play_" + id + ">&#9654;</button>";
         tag += " <button class='segBtn' style='color:red;' id=cancel_" + id + ">&#10060;</button>";
         tag += "</td></tr>";
