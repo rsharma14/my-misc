@@ -49,13 +49,16 @@ public class LogAspectHandlerNative2 {
 	private static final int initPaddingLeft = 10;
 	private static final int paddingLeftIncr = 15;
 
-	private static final String basePkg = "com.spring";
+	private static final String basePkg = "com.ctl.bmp.service.catalog_service";
 	private static final String excludePkgs = " && !call(* *..*dto*..*(..))  && !call(* *..*pojo*..*(..))  "
 			+ "&& !call(* *..*entity*..*(..))  && !call(* *..*model*..*(..))  && !call(* *..*error*..*(..))";
 	private static final String excludePkgsCustom =" && !call(* *..*daos*..*(..))  "
 			+ " && !call(* "+basePkg+"..*.helper.*.*(..))"+" && !call(* "+basePkg+"..*.helper.*.*(..))"
 			+" && !call(* "+basePkg+".catalog_db_adapter.*.*(..))"
 			+" && !call(* "+basePkg+"..*.Builder.*(..))"
+			//+" && !call(* "+basePkg+".services.wrapper..*(..))"
+			//+" && !call(* "+basePkg+".services.managers..*(..))"
+			//+" && !call(* "+basePkg+".services.ProductOfferingServiceV2.*(..))"
 			;
 	private static final String excludeCLassess =" && !call(* "+basePkg+".services.ProductOfferingServiceV2.*(..))";
 	//TBD
