@@ -1,7 +1,7 @@
 
 <aspectj>
 	<aspects>
-		<aspect name="com.simbatech.apiflow.LogAspectHandlerNative3" />
+		<aspect name="com.simbatech.apiflow.LogAspectHandlerNative2" />
 		<weaver options="-verbose -showWeaveInfo">
 			<!-- DONT TOUCH -->
 			<include within="com.simbatech.apiflow..*" /> <!-- IMPORTANT: pkg of aspect class must include -->
@@ -15,7 +15,7 @@
 			<!-- default end -->
 			
 			<!-- add your packages to be advised here-->
-			<include within="com.spring..*" />
+			<include within="com.ctl.bmp.service.catalog_service..*" />
 			
 
 		</weaver>

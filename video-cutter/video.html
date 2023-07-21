@@ -202,7 +202,7 @@
     startClip.addEventListener('click', function () {
 
       startTime_ = getFormattedTime(videoPlayer.currentTime);
-      startTimeSec_ = videoPlayer.currentTime-1;
+      startTimeSec_ = videoPlayer.currentTime;
       endTime_ = undefined;
       setHMS(0, startTime_);
 
@@ -210,7 +210,7 @@
     endClip.addEventListener('click', function () {
       if (startTime_) {
         endTime_ = getFormattedTime(videoPlayer.currentTime);
-        endTimeSec_ = videoPlayer.currentTime+1;
+        endTimeSec_ = videoPlayer.currentTime;
         setHMS(1, endTime_);
       }
 

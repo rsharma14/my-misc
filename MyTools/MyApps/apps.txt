@@ -1,9 +1,9 @@
-Eclipse==C:\Users\ac49999\Rajendra\1.ADE\1.ADE\sts-4.6.1.RELEASE\SpringToolSuite4.exe==false
-Intellij==C:\Users\ac49999\Rajendra\1.ADE\1.ADE\Intellij.2020.2.4\bin\idea64.exe==true
-VS Code==C:\Users\ac49999\AppData\Local\Programs\Microsoft VS Code\Code.exe==true
+Eclipse==C:\Users\ac49999\Rajendra\1.IDE\1.STS_IDE\SpringToolSuite4.exe==false
+Intellij==C:\Users\ac49999\Rajendra\1.IDE\2.IJ_IDE\bin\idea64.exe==true
+VS Code==C:\Program Files\Microsoft VS Code\Code.exe==true
 Robo MongoDB==C:\Users\ac49999\Rajendra\2.Software\robo3t-1.4.4==false
 Notepad++==C:\Program Files\Notepad++\notepad++.exe==true
-Chrome==C:\Program Files (x86)\Google\Chrome\Application\chrome.exe==true
+Chrome==C:\Program Files\Google\Chrome\Application\chrome.exe==true
 Firefox==C:\Program Files\Mozilla Firefox\firefox.exe==true
 OUTLOOK==C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE==true
 MSTeams==C:\Users\ac49999\AppData\Local\Microsoft\Teams\current\Teams.exe==true
