@@ -69,7 +69,8 @@ function clipCut(requestData) {
         console.log(time[0] + "===" + time[1])
         cmd = command.replace("START_TIME", time[0])
           .replace("END_TIME", time[1]).replace("INPUT_FILE", ip_file)
-          .replace("OUTPUT_FILE", path.join(op_folder, fn + ("_[" + time[0] + "-" + time[1] + "]").replaceAll(":", ".") + "." + ext));
+          .replace("OUTPUT_FILE", path.join(op_folder, fn + ("_[" + time[0] + "-" + time[1] + "]")
+          .replaceAll(":", ".") + "." + ext));
 
         callTerminal(cmd);
 
@@ -77,7 +78,7 @@ function clipCut(requestData) {
     }
 
   });
-  return `Files will saved in ${op_folder}`;
+  return `Files will be saved in \n${op_folder}`;
 
 }
 function callTerminal(cmd) {
