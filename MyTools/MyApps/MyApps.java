@@ -6,20 +6,18 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MyApps {
 
 	private ClassLoader classLoader = this.getClass().getClassLoader();
 
-	private List<MyPojo> tools = readFile("apps.txt");
+	private Set<MyPojo> tools = readFile("apps.txt");
 
 
-	List<String> selected = tools.stream().filter(a -> a.getIsDefault()).map(MyPojo::getLoc)
-			.collect(Collectors.toList());
+	Set<String> selected = tools.stream().filter(a -> a.getIsDefault()).map(MyPojo::getLoc)
+			.collect(Collectors.toSet());
 
 	MyApps() {
 
@@ -107,8 +105,8 @@ public class MyApps {
 		new MyApps();
 	}
 
-	private List<MyPojo> readFile(String file) {
-		List<MyPojo> links = new ArrayList<>();
+	private Set<MyPojo> readFile(String file) {
+		Set<MyPojo> links = new HashSet<>();
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(file)))) {
 
