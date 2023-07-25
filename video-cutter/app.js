@@ -58,9 +58,9 @@ function clipCut(requestData) {
 
   //const op_folder = path.join(downloadsFolderPath, "MyVideoCutter", fn + "_" + formatDate());
   const op_folder = path.join(downloadsFolderPath, "MyVideoCutter", fn);
-  const command = 'ffmpeg -y -i "INPUT_FILE" -ss START_TIME -to END_TIME "OUTPUT_FILE"';
+  const command = 'ffmpeg -y -i "INPUT_FILE" -ss START_TIME -to END_TIME -c:v copy -c:a copy "OUTPUT_FILE"';
   //const command = 'ffmpeg -y -i "INPUT_FILE" -ss START_TIME -to END_TIME  -acodec copy -vcodec copy "OUTPUT_FILE"';
-  //const command = 'ffmpeg -y -i "INPUT_FILE" -ss START_TIME -t DURATION  -c:v copy -c:a copy "OUTPUT_FILE"';
+  //const command = 'ffmpeg -y -ss START_TIME -i "INPUT_FILE"  -t DURATION  -c:v copy -c:a copy "OUTPUT_FILE"';
 
   fs.mkdir(op_folder, { recursive: true }, (err) => {
     if (err) {
