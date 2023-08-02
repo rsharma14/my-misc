@@ -1,0 +1,27 @@
+1. open multiple projects in intellij:
+(View > Tool Windows > Maven Projects) and then select the additional 
+
+2. add lombox
+=>File->Settings-> Build, Execution, Deployment | Compiler | Annotation Processors and make sure of the following:
+
+"Enable annotation processing" box is checked
+"Obtain processors from project classpath option" is selected
+
+=>File->Settings->=>Plugins, open the Marketplace tab, type “lombok” and choose Lombok Plugin by Michail Plushnikov
+
+3. In IDE Settings -> Editor -> Editor tabs, check "Mark modified tabs with asterisk".
+
+
+
+4.---Keyword shortcut---
+
+Optimize Imports=Ctrl+Alt+O
+Reformat code=Ctrl+Alt+L
+Find in Files=Ctrl+Shift+F
+Duplicate lines=Ctrl+D
+Navigate to line=Ctrl+G
+quick-fix=Alt+Enter
+Search Everywhere=Double Shift
+Add/remove line or block comment=Ctrl+/
+Comment out a line or block of code=Ctrl+Shift+/
+delete line=Alt+D
