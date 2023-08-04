@@ -57,7 +57,7 @@
 <body>
     <div id="container">
         <div id="suggestionBox">
-            <textarea id="queryBar" name="w3review" rows="1" cols="50"
+            <textarea id="queryBar" name="w3review" rows="2" cols="50"
                 placeholder="Enter your query to filter data"></textarea>
             <button type="button" id="queryBtn">Search</button>
         </div>
@@ -76,10 +76,12 @@
         options.onChange = (a, b, c) => {
             //if (isJSON(editor.getText())) {}
             setTimeout(() => {
-                editor.set(json = editor.get());
+                if(!isJSON(editor.getText())) return;
+                //editor.set(json = editor.get());
+                json = editor.get();;                
                 objKeys = new Set();
                 iterate(json, '$');
-            }, 1000);
+            }, 500);
 
 
         }
@@ -87,28 +89,25 @@
             console.log({ newMode, oldMode });
         }
         const editor = new JSONEditor(container, options)
-        //document.querySelector(".jsoneditor-poweredBy")?.remove()
-        editor.set(json)
-        iterate(json, '$');
+        document.querySelector(".jsoneditor-poweredBy")?.remove();
+        editor.set(undefined);
+        //iterate(json, '$');
         function iterate(obj, stack) {
             for (var property in obj) {
-                //console.log(property)
                 if (obj.hasOwnProperty(property)) {
-                    if (typeof obj[property] == "object") {
-                        //iterate(obj[property], stack + '.' + property, (stack + '.' + (isNumber(property) ? "[*]" : property)));
-                        iterate(obj[property], (stack + '.' + (isNumber(property) ? "[*]" : property)));
+                    if (typeof obj[property] == "object") {                         
+                        iterate(obj[property], (stack + (isNumber(property) ? "[*]" :'.'+ property)));
                     } else {
-                        //objKeys.push(property + "   " + obj[property]);                      
-                        //objKeys.push(stack + '.' + property);  //all props
-                        //objKeys.push(wildcard + "." + property);   //wild card
-                        //objKeys.add(stack + '.' + property);  //all props
-                        objKeys.add(stack + "." + property);  //wild card
+                        objKeys.add(stack + "." + property);
                     }
                 }
             }
+            if(stack && !obj)
+            objKeys.add(stack); //null/undefined value keys
+
         }
         document.querySelector("#queryBar").addEventListener("focusin", () => {
-            document.querySelector("#queryBar").select();
+            //document.querySelector("#queryBar").select();
         });
         document.querySelector("#queryBar").addEventListener("input", () => {
             let input = document.querySelector("#queryBar").value;
@@ -148,8 +147,10 @@
         function isJSON(jsonStr) {
             try {
                 JSON.parse(jsonStr);
+                console.log("valid json");
                 return true;
             } catch (e) {
+                console.log("not valid json");
                 return false;
             }
         }
