@@ -21,6 +21,28 @@
             padding-bottom: 4px;
         }
 
+        #suggestions {
+            max-width: 670px;
+            overflow-y: scroll;
+            max-height: 216px;
+            width: auto;
+            margin-bottom: 5px;
+            cursor: pointer;
+            position: absolute;
+            z-index: 111;
+            background: #e3e0db;
+
+        }
+
+        #suggestions div {
+            padding: 5px 10px 5px 10px;
+        }
+
+        #suggestions div:hover {
+            background-color: lightblue;
+
+        }
+
         #jsoneditor {
             width: 100%;
             height: 100%;
@@ -44,7 +66,7 @@
         <div id="jsoneditor"></div>
     </div>
     <script>
-        var json ;//= { "firstName": "John", "lastName": "doe", "age": 26, "address": { "streetAddress": "naist street", "city": "Nara", "postalCode": "630-0192" }, "phoneNumbers": [{ "type": "iPhone", "number": "0123-4567-8888" }, { "type": "home", "number": "0123-4567-8910" }] };
+        var json = { "firstName": "John", "lastName": "doe", "age": 26, "address": { "streetAddress": "naist street", "city": "Nara", "postalCode": "630-0192" }, "phoneNumbers": [{ "type": "iPhone", "number": "0123-4567-8888" }, { "type": "home", "number": "0123-4567-8910" }] };
         var objKeys = new Set();
         const container = document.getElementById("jsoneditor");
         const options = {
@@ -66,8 +88,8 @@
         }
         const editor = new JSONEditor(container, options)
         //document.querySelector(".jsoneditor-poweredBy")?.remove()
-        //editor.set(json)
-        //iterate(json, '$');
+        editor.set(json)
+        iterate(json, '$');
         function iterate(obj, stack) {
             for (var property in obj) {
                 //console.log(property)
@@ -104,12 +126,18 @@
 
             editor.set(jsonPath(json, q));
         });
+        document.addEventListener("click", () => {
+            const div = document.getElementById("suggestions");
+            if (!div.contains(event.target)) {
+                document.querySelector("#suggestions").innerHTML = '';
+            }
+        });
 
         function filterObjKeys(key) {
             let ret = "";
             objKeys.forEach((o) => {
                 if (o.toLowerCase().indexOf(key.toLowerCase()) > -1)
-                    ret += `<p onclick=selectSuggestion(this)>${o}</p>`;
+                    ret += `<div class="suggestion" onclick=selectSuggestion(this)>${o}</div>`;
             });
             return ret;
         }
