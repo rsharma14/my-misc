@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <!-- when using the mode "code", it's important to specify charset utf-8 -->
+    <meta charset="utf-8">
+
+    <link href="json.css" rel="stylesheet" type="text/css">
+    <link href="jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="jsoneditor.min.js"></script>
+    <script src="jsonpath.js"></script>
+    <style>
+        #container {
+            width: 600px;
+            height: 500px;
+        }
+
+        #suggestionBox {
+            display: flex;
+            align-items: center;
+            padding-bottom: 4px;
+        }
+
+        #jsoneditor {
+            width: 100%;
+            height: 100%;
+        }
+
+        #queryBar {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="suggestionBox">
+            <textarea id="queryBar" name="w3review" rows="1" cols="50"
+                placeholder="Enter your query to filter data"></textarea>
+            <button type="button" id="queryBtn">Search</button>
+        </div>
+        <div id="suggestions"></div>
+
+        <div id="jsoneditor"></div>
+    </div>
+    <script>
+        var json ;//= { "firstName": "John", "lastName": "doe", "age": 26, "address": { "streetAddress": "naist street", "city": "Nara", "postalCode": "630-0192" }, "phoneNumbers": [{ "type": "iPhone", "number": "0123-4567-8888" }, { "type": "home", "number": "0123-4567-8910" }] };
+        var objKeys = new Set();
+        const container = document.getElementById("jsoneditor");
+        const options = {
+            modes: ['text', 'code', 'tree', 'form', 'view'],
+            mode: 'code',
+        };
+        options.onChange = (a, b, c) => {
+            //if (isJSON(editor.getText())) {}
+            setTimeout(() => {
+                editor.set(json = editor.get());
+                objKeys = new Set();
+                iterate(json, '$');
+            }, 1000);
+
+
+        }
+        options.onModeChange = (newMode, oldMode) => {
+            console.log({ newMode, oldMode });
+        }
+        const editor = new JSONEditor(container, options)
+        //document.querySelector(".jsoneditor-poweredBy")?.remove()
+        //editor.set(json)
+        //iterate(json, '$');
+        function iterate(obj, stack) {
+            for (var property in obj) {
+                //console.log(property)
+                if (obj.hasOwnProperty(property)) {
+                    if (typeof obj[property] == "object") {
+                        //iterate(obj[property], stack + '.' + property, (stack + '.' + (isNumber(property) ? "[*]" : property)));
+                        iterate(obj[property], (stack + '.' + (isNumber(property) ? "[*]" : property)));
+                    } else {
+                        //objKeys.push(property + "   " + obj[property]);                      
+                        //objKeys.push(stack + '.' + property);  //all props
+                        //objKeys.push(wildcard + "." + property);   //wild card
+                        //objKeys.add(stack + '.' + property);  //all props
+                        objKeys.add(stack + "." + property);  //wild card
+                    }
+                }
+            }
+        }
+        document.querySelector("#queryBar").addEventListener("focusin", () => {
+            document.querySelector("#queryBar").select();
+        });
+        document.querySelector("#queryBar").addEventListener("input", () => {
+            let input = document.querySelector("#queryBar").value;
+            if (!input) {
+                editor.set(json);
+                return;
+            }
+            document.querySelector("#suggestions").innerHTML = filterObjKeys(input);
+        });
+        document.querySelector("#queryBtn").addEventListener("click", () => {
+            let q = document.querySelector("#queryBar").value
+            document.querySelector("#suggestions").innerHTML = '';
+            if (!q)
+                return editor.set(json);
+
+            editor.set(jsonPath(json, q));
+        });
+
+        function filterObjKeys(key) {
+            let ret = "";
+            objKeys.forEach((o) => {
+                if (o.toLowerCase().indexOf(key.toLowerCase()) > -1)
+                    ret += `<p onclick=selectSuggestion(this)>${o}</p>`;
+            });
+            return ret;
+        }
+        function selectSuggestion(t) {
+            document.querySelector("#queryBar").value = t.innerText?.trim();
+            document.querySelector("#suggestions").innerHTML = '';
+        }
+        function isJSON(jsonStr) {
+            try {
+                JSON.parse(jsonStr);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+        function isNumber(str) {
+            return !isNaN(parseFloat(str)) && str.trim() !== "";
+        }
+
+
+        //editor.set(json);
+    </script>
+</body>
+
+</html>
