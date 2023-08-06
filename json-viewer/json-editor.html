@@ -76,9 +76,9 @@
         options.onChange = (a, b, c) => {
             //if (isJSON(editor.getText())) {}
             setTimeout(() => {
-                if(!isJSON(editor.getText())) return;
+                if (!isJSON(editor.getText())) return;
                 //editor.set(json = editor.get());
-                json = editor.get();;                
+                json = editor.get();;
                 objKeys = new Set();
                 iterate(json, '$');
             }, 500);
@@ -95,20 +95,21 @@
         function iterate(obj, stack) {
             for (var property in obj) {
                 if (obj.hasOwnProperty(property)) {
-                    if (typeof obj[property] == "object") {                         
-                        iterate(obj[property], (stack + (isNumber(property) ? "[*]" :'.'+ property)));
+                    if (typeof obj[property] == "object") {
+                        iterate(obj[property], (stack + (isNumber(property) ? "[*]" : '.' + property)));
                     } else {
                         objKeys.add(stack + "." + property);
                     }
                 }
             }
-            if(stack && !obj)
-            objKeys.add(stack); //null/undefined value keys
+            if (stack && !obj)
+                objKeys.add(stack); //null/undefined value keys
 
         }
         document.querySelector("#queryBar").addEventListener("focusin", () => {
             //document.querySelector("#queryBar").select();
         });
+
         document.querySelector("#queryBar").addEventListener("input", () => {
             let input = document.querySelector("#queryBar").value;
             if (!input) {
@@ -117,14 +118,19 @@
             }
             document.querySelector("#suggestions").innerHTML = filterObjKeys(input);
         });
-        document.querySelector("#queryBtn").addEventListener("click", () => {
-            let q = document.querySelector("#queryBar").value
-            document.querySelector("#suggestions").innerHTML = '';
-            if (!q)
-                return editor.set(json);
 
-            editor.set(jsonPath(json, q));
+        document.querySelector("#queryBtn").addEventListener("click", () => {
+            searchInJSON();
         });
+        queryBar.addEventListener("keydown", (event) => {
+
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                searchInJSON();
+            }
+
+        });
+
         document.addEventListener("click", () => {
             const div = document.getElementById("suggestions");
             if (!div.contains(event.target)) {
@@ -132,6 +138,14 @@
             }
         });
 
+        function searchInJSON() {
+            let q = document.querySelector("#queryBar").value
+            document.querySelector("#suggestions").innerHTML = '';
+            if (!q)
+                return editor.set(json);
+
+            editor.set(jsonPath(json, q));
+        }
         function filterObjKeys(key) {
             let ret = "";
             objKeys.forEach((o) => {
@@ -143,6 +157,7 @@
         function selectSuggestion(t) {
             document.querySelector("#queryBar").value = t.innerText?.trim();
             document.querySelector("#suggestions").innerHTML = '';
+            document.querySelector("#queryBar").focus();
         }
         function isJSON(jsonStr) {
             try {
