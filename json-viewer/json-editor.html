@@ -11,8 +11,8 @@
     <script src="jsonpath.js"></script>
     <style>
         #container {
-            width: 600px;
-            height: 500px;
+            width: 70%;
+            height: 550px;
         }
 
         #suggestionBox {
@@ -59,39 +59,48 @@
         <div id="suggestionBox">
             <textarea id="queryBar" name="w3review" rows="2" cols="50"
                 placeholder="Enter your query to filter data"></textarea>
-            <button type="button" id="queryBtn">Search</button>
+            <button type="button" id="queryBtn">Search</button><br>
+            <input type="checkbox" title="Enable query search" onchange="enableQSerch(this)">
+
         </div>
         <div id="suggestions"></div>
-
         <div id="jsoneditor"></div>
     </div>
     <script>
-        var json = { "firstName": "John", "lastName": "doe", "age": 26, "address": { "streetAddress": "naist street", "city": "Nara", "postalCode": "630-0192" }, "phoneNumbers": [{ "type": "iPhone", "number": "0123-4567-8888" }, { "type": "home", "number": "0123-4567-8910" }] };
+        var json = undefined;
         var objKeys = new Set();
+        var currentMode = 'code';
+        var enableQSerchFlag = false;
         const container = document.getElementById("jsoneditor");
         const options = {
-            modes: ['text', 'code', 'tree', 'form', 'view'],
-            mode: 'code',
+            modes: ['text', 'code', 'tree', 'form', 'view', 'preview'],
+            mode: currentMode,
         };
         options.onChange = (a, b, c) => {
-            //if (isJSON(editor.getText())) {}
+            console.log("onChange")
             setTimeout(() => {
                 if (!isJSON(editor.getText())) return;
-                //editor.set(json = editor.get());
-                json = editor.get();;
+                if (currentMode !== 'code') return;
+                document.querySelector("#queryBar").value = null;
+                editor.set(json = editor.get());
+                json = editor.get();
                 objKeys = new Set();
-                iterate(json, '$');
+                if (enableQSerchFlag)
+                    iterate(json, '$');
             }, 500);
 
 
         }
         options.onModeChange = (newMode, oldMode) => {
+            currentMode = newMode;
             console.log({ newMode, oldMode });
+            //if (currentMode === 'code' && enableQSerchFlag)
+            //iterate(json, '$');
         }
         const editor = new JSONEditor(container, options)
         document.querySelector(".jsoneditor-poweredBy")?.remove();
         editor.set(undefined);
-        //iterate(json, '$');
+
         function iterate(obj, stack) {
             for (var property in obj) {
                 if (obj.hasOwnProperty(property)) {
@@ -145,6 +154,11 @@
                 return editor.set(json);
 
             editor.set(jsonPath(json, q));
+        }
+        function enableQSerch(ctx) {
+            enableQSerchFlag = ctx.checked;
+            if (ctx.checked == true)
+                iterate(json, '$');
         }
         function filterObjKeys(key) {
             let ret = "";
