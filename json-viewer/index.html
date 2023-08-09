@@ -112,8 +112,9 @@
         options.onChange = (a, b, c) => {
             console.log("onChange")
             setTimeout(() => {
-                if (!isJSON(editor.getText())) return;
                 if (currentMode !== 'code') return;
+                if (!isJSON(editor.getText())) return;
+                
                 document.querySelector("#queryBar").value = null;
                 editor.set(json = editor.get());
                 json = editor.get();

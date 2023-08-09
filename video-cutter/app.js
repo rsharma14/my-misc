@@ -7,6 +7,7 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 const downloadsFolderPath = path.join(require('os').homedir(), 'Downloads');
+const historyFile = 'history.txt';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -74,6 +75,7 @@ function clipCut(requestData) {
       console.error('Error creating the folder:', err);
     } else {
       console.log('Folder created successfully:', op_folder);
+      addInHistory("\n=====" + new Date() + "=====\n");
       callRecursively(ip_file, op_folder, times, 0);
       for (let time of times) {
         //console.log(time[0] + "===" + time[1])
@@ -104,11 +106,11 @@ function callRecursively(ip_file, op_folder, times, idx) {
 function callFFMPG(ip_file, op_file, ss, to, t, callback) {
 
   const ffmpeg = spawn('ffmpeg', [
-    '-y', '-i', ip_file, '-ss', ss, '-to', to,//'-t',t,
-    '-map', '0', '-c:v', 'libx264', '-c:a', 'copy', op_file
+    '-n', '-i', ip_file, '-ss', ss, '-to', to,//'-t',t,
+    '-c:v', 'libx264', '-c:a', 'copy', op_file
   ]);
   console.log(`Runnung cmd= ${ffmpeg.spawnargs.toString().replaceAll(",", " ")}`);
-
+  addInHistory(ip_file + ":[" + ss + " - " + to + "]" + ":STARTED.....[" + ffmpeg.spawnargs.toString().replaceAll(",", " ") + "]\n");
   ffmpeg.stdout.on("data", data => {
     console.log(`stdout: ${data}`);
   });
@@ -124,6 +126,8 @@ function callFFMPG(ip_file, op_file, ss, to, t, callback) {
   ffmpeg.on("close", code => {
     console.log(`child process exited with code ${code}`);
     console.log(`cmd executed= ${ffmpeg.spawnargs.toString().replaceAll(",", " ")}`);
+    if (code === 0)
+      addInHistory(ip_file + ":[" + ss + " - " + to + "]" + ":OK\n");
     callback();
   });
 
@@ -144,6 +148,14 @@ function callFFMPG(ip_file, op_file, ss, to, t, callback) {
 */
 
 }
+
+
+function addInHistory(content) {
+  console.log(content);
+  fs.appendFileSync(historyFile, content);
+}
+
+
 function formatDate() {
   let date = new Date();
   const year = date.getFullYear();
