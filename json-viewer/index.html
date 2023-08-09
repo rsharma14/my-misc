@@ -22,23 +22,32 @@
         }
 
         #suggestions {
-            max-width: 670px;
+
             overflow-y: scroll;
-            max-height: 216px;
-            width: auto;
+            max-height: 400px;
+            max-width: 70%;
             margin-bottom: 5px;
             cursor: pointer;
             position: absolute;
             z-index: 111;
             background: #e3e0db;
-
+            word-wrap: break-word;
         }
 
         #suggestions div {
             padding: 5px 10px 5px 10px;
         }
 
-        #suggestions div:hover {
+
+        #suggestions .suggestion:nth-child(even) {
+            background-color: #ebe8e8;
+        }
+
+        #suggestions .suggestion:nth-child(odd) {
+            background-color: #d8d8e7;
+        }
+
+        #suggestions .suggestion:hover {
             background-color: lightblue;
 
         }
@@ -50,6 +59,10 @@
 
         #queryBar {
             width: 100%;
+        }
+
+        .ace_editor .ace-jsoneditor {
+            font-size: 12px !important;
         }
     </style>
     <title>My json viewer</title>
@@ -73,7 +86,7 @@
         var currentMode = 'code';
         var enableQSerchFlag = false;
         const container = document.getElementById("jsoneditor");
-        
+
         document.querySelector("#queryBar").addEventListener("focusin", () => {
             //document.querySelector("#queryBar").select();
         });
@@ -114,7 +127,7 @@
             setTimeout(() => {
                 if (currentMode !== 'code') return;
                 if (!isJSON(editor.getText())) return;
-                
+
                 document.querySelector("#queryBar").value = null;
                 editor.set(json = editor.get());
                 json = editor.get();
