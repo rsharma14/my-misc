@@ -52,6 +52,7 @@
             width: 100%;
         }
     </style>
+    <title>My json viewer</title>
 </head>
 
 <body>
@@ -72,49 +73,7 @@
         var currentMode = 'code';
         var enableQSerchFlag = false;
         const container = document.getElementById("jsoneditor");
-        const options = {
-            modes: ['text', 'code', 'tree', 'form', 'view', 'preview'],
-            mode: currentMode,
-        };
-        options.onChange = (a, b, c) => {
-            console.log("onChange")
-            setTimeout(() => {
-                if (!isJSON(editor.getText())) return;
-                if (currentMode !== 'code') return;
-                document.querySelector("#queryBar").value = null;
-                editor.set(json = editor.get());
-                json = editor.get();
-                objKeys = new Set();
-                if (enableQSerchFlag)
-                    iterate(json, '$');
-            }, 1000);
-
-
-        }
-        options.onModeChange = (newMode, oldMode) => {
-            currentMode = newMode;
-            console.log({ newMode, oldMode });
-            //if (currentMode === 'code' && enableQSerchFlag)
-            //iterate(json, '$');
-        }
-        const editor = new JSONEditor(container, options)
-        document.querySelector(".jsoneditor-poweredBy")?.remove();
-        editor.set(undefined);
-
-        function iterate(obj, stack) {
-            for (var property in obj) {
-                if (obj.hasOwnProperty(property)) {
-                    if (typeof obj[property] == "object") {
-                        iterate(obj[property], (stack + (isNumber(property) ? "[*]" : '.' + property)));
-                    } else {
-                        objKeys.add(stack + "." + property);
-                    }
-                }
-            }
-            if (stack && !obj)
-                objKeys.add(stack); //null/undefined value keys
-
-        }
+        
         document.querySelector("#queryBar").addEventListener("focusin", () => {
             //document.querySelector("#queryBar").select();
         });
@@ -146,7 +105,49 @@
                 document.querySelector("#suggestions").innerHTML = '';
             }
         });
+        const options = {
+            modes: ['text', 'code', 'tree', 'form', 'view', 'preview'],
+            mode: currentMode,
+        };
+        options.onChange = (a, b, c) => {
+            console.log("onChange")
+            setTimeout(() => {
+                if (!isJSON(editor.getText())) return;
+                if (currentMode !== 'code') return;
+                document.querySelector("#queryBar").value = null;
+                editor.set(json = editor.get());
+                json = editor.get();
+                objKeys = new Set();
+                if (enableQSerchFlag)
+                    iterate(json, '$');
+            }, 500);
 
+
+        }
+        options.onModeChange = (newMode, oldMode) => {
+            currentMode = newMode;
+            console.log({ newMode, oldMode });
+            //if (currentMode === 'code' && enableQSerchFlag)
+            //iterate(json, '$');
+        }
+        const editor = new JSONEditor(container, options)
+        //document.querySelector(".jsoneditor-poweredBy")?.remove();
+        editor.set(undefined);
+
+        function iterate(obj, stack) {
+            for (var property in obj) {
+                if (obj.hasOwnProperty(property)) {
+                    if (typeof obj[property] == "object") {
+                        iterate(obj[property], (stack + (isNumber(property) ? "[*]" : '.' + property)));
+                    } else {
+                        objKeys.add(stack + "." + property);
+                    }
+                }
+            }
+            if (stack && !obj)
+                objKeys.add(stack); //null/undefined value keys
+
+        }
         function searchInJSON() {
             let q = document.querySelector("#queryBar").value
             document.querySelector("#suggestions").innerHTML = '';
