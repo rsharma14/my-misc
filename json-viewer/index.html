@@ -9,66 +9,21 @@
     <link href="jsoneditor.min.css" rel="stylesheet" type="text/css">
     <script src="jsoneditor.min.js"></script>
     <script src="jsonpath.js"></script>
-    <style>
-        #container {
-            width: 70%;
-            height: 550px;
-        }
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>-->
 
-        #suggestionBox {
-            display: flex;
-            align-items: center;
-            padding-bottom: 4px;
-        }
-
-        #suggestions {
-
-            overflow-y: scroll;
-            max-height: 400px;
-            max-width: 70%;
-            margin-bottom: 5px;
-            cursor: pointer;
-            position: absolute;
-            z-index: 111;
-            background: #e3e0db;
-            word-wrap: break-word;
-        }
-
-        #suggestions div {
-            padding: 5px 10px 5px 10px;
-        }
-
-
-        #suggestions .suggestion:nth-child(even) {
-            background-color: #ebe8e8;
-        }
-
-        #suggestions .suggestion:nth-child(odd) {
-            background-color: #d8d8e7;
-        }
-
-        #suggestions .suggestion:hover {
-            background-color: lightblue;
-
-        }
-
-        #jsoneditor {
-            width: 100%;
-            height: 100%;
-        }
-
-        #queryBar {
-            width: 100%;
-        }
-
-        .ace_editor .ace-jsoneditor {
-            font-size: 12px !important;
-        }
-    </style>
     <title>My json viewer</title>
 </head>
 
 <body>
+    <div id="header">
+        <a href="#" title="Home">Home</a>
+        <a href="https://jsonlint.com/" target="_blank" title="Validate json">JSON Lint</a>
+        <a href="https://unminify.com/" target="_blank" title="un minify code">Unminify Code</a>
+        <a href="https://minify-js.com/" target="_blank" title="minify code">Minify Code</a>
+        <a href="https://text-compare.com/" target="_blank" title="text-compare">Text/JSON Compare</a>
+        <!-- <a href="https://minify-js.com/" target="_blank" title="minify code">Minify Code</a> -->
+
+    </div>
     <div id="container">
         <div id="suggestionBox">
             <textarea id="queryBar" name="w3review" rows="2" cols="50"
