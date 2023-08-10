@@ -75,7 +75,7 @@ function clipCut(requestData) {
       console.error('Error creating the folder:', err);
     } else {
       console.log('Folder created successfully:', op_folder);
-      addInHistory("\n=====" + new Date() + "=====\n");
+      addInHistory("\n=====" + new Date() + "=====\n"+JSON.stringify(requestData.times)+"\n");
       callRecursively(ip_file, op_folder, times, 0);
       for (let time of times) {
         //console.log(time[0] + "===" + time[1])
