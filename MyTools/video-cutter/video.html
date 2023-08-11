@@ -131,11 +131,19 @@
         </td>
         <td class="center">
           <span class="badge">6</span><button id="save-clips"><strong>&#9986;</strong>Save Clips</button>
+          <button id="show-hide"><strong></strong>Show Segments</button>
+
         </td>
       </tr>
+
     </tbody>
   </table>
-  <div id="savedClipTimes"></div>
+  <div id="hideDiv" style="display: none;">
+    O/P folder: <input type="text" id="opFolder" size="70" />
+    <button id="show-segs"><strong></strong>Show command</button>
+    <div id="savedClipTimes"></div>
+
+  </div>
 
 
   <script>
@@ -149,6 +157,8 @@
     var reset = document.getElementById('reset-button');
     var playPrev = document.getElementById('playPrev');
     var playFwd = document.getElementById('playFwd');
+    var showHide = document.getElementById('show-hide');
+    var showSegs = document.getElementById('show-segs');
 
     var clips = {};
     var idx = 0;
@@ -221,7 +231,7 @@
         return;
       pstartTime = startTime_;
       pendTime = endTime_;
-      clips[idx++] = { startTime: startTime_, endTime: endTime_,duration:calculateDuration(startTime_, endTime_)  };
+      clips[idx++] = { startTime: startTime_, endTime: endTime_, duration: calculateDuration(startTime_, endTime_) };
       addInSegs();
     });
     clipSeg.addEventListener('click', function () {
@@ -260,6 +270,24 @@
 
       }
     });
+    showHide.addEventListener('click', function () {
+      if (document.querySelector("#hideDiv").style.display == "block")
+        document.querySelector("#hideDiv").style.display = "none";
+      else
+        document.querySelector("#hideDiv").style.display = "block";
+    });
+    showSegs.addEventListener('click', function () {
+      let ret = "";
+      let ip = document.querySelector("#folderName").value;
+      let op = document.querySelector("#opFolder").value;
+
+      for (let i in clips) {
+          ret += `ffmpeg -n -i ${ip}\/${fileName} -ss ${clips[i].startTime} -to ${clips[i].endTime} -c:v libx264 -c:a copy ${op}\\${fileName}<br><br>`;
+      }
+      document.querySelector("#savedClipTimes").innerHTML = "<div id='copyTimes'>" + ret + "</div>";
+      copyTimes();
+    });
+
     saveClips.addEventListener('click', function () {
       console.log(clips);
       let arr = [];
@@ -281,7 +309,7 @@
       window.location.reload();
     });
 
-    function playVideoAsCurrent(){
+    function playVideoAsCurrent() {
       if (!videoPlayer.paused) {
         videoPlayer.play();
       }
