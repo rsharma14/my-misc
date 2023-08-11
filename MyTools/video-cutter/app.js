@@ -110,7 +110,7 @@ function callFFMPG(ip_file, op_file, ss, to, t, callback) {
     '-c:v', 'libx264', '-c:a', 'copy', op_file
   ]);
   console.log(`Runnung cmd= ${ffmpeg.spawnargs.toString().replaceAll(",", " ")}`);
-  addInHistory(ip_file + ":[" + ss + " - " + to + "]" + ":STARTED.....[" + ffmpeg.spawnargs.toString().replaceAll(",", " ") + "]\n");
+  addInHistory(ip_file + ":[" + ss + " - " + to + "]" + ":STARTED("+new Date()+").....[" + ffmpeg.spawnargs.toString().replaceAll(",", " ") + "]\n");
   ffmpeg.stdout.on("data", data => {
     console.log(`stdout: ${data}`);
   });
@@ -127,7 +127,7 @@ function callFFMPG(ip_file, op_file, ss, to, t, callback) {
     console.log(`child process exited with code ${code}`);
     console.log(`cmd executed= ${ffmpeg.spawnargs.toString().replaceAll(",", " ")}`);
     if (code === 0)
-      addInHistory(ip_file + ":[" + ss + " - " + to + "]" + ":OK\n");
+      addInHistory(ip_file + ":[" + ss + " - " + to + "]" + ":OK("+new Date()+")\n");
     callback();
   });
 
