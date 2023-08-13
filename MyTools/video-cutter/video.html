@@ -41,9 +41,9 @@
     }
 
     .segBtn {
-      height: 24px;
       width: 24px;
       padding: 0px;
+      font-size: 18px;
     }
 
     .bkt {
@@ -195,7 +195,7 @@
       if (SegStartFlag && videoPlayer.currentTime >= endTimeSec_) {
         videoPlayer.pause();
         SegStartFlag = false;
-        currentTargetInSeg.innerHTML = "&#9658;";
+        currentTargetInSeg.innerHTML = "&#10148;";
 
       }
 
@@ -215,7 +215,7 @@
 
       startTime_ = getFormattedTime(videoPlayer.currentTime);
       startTimeSec_ = videoPlayer.currentTime;
-      endTime_ = undefined;
+      endTime_ = enableEdit ? endTime_ : undefined;
       setHMS(0, startTime_);
 
     });
@@ -264,14 +264,14 @@
         document.querySelector(`#seg_${targetId}`).style.backgroundColor = '#abedad';
 
         document.querySelectorAll("[id^='play_']").forEach(a => {
-          a.innerHTML = "&#9658;";
+          a.innerHTML = "&#10148;";
         });
         //target.innerHTML = "&#10074;&#10074;"
 
         currentTargetInSeg = target;
         playVideo(target.id.split("_")[1], target);
 
-      } else if (target && target.id?.startsWith('cancel_')) {
+      } else if (target && target.id?.startsWith('delete_')) {
         delete clips[target.id.split("_")[1]];
         addInSegs();
 
@@ -290,6 +290,10 @@
           target.style.backgroundColor = 'red';
         }
         editInSegs(target.id.split("_")[1]);
+
+      } else if (target && target.id?.startsWith('end_')) {
+        let et = clips[target.id.split("_")[1]];
+        videoPlayer.currentTime = convertTimeToSeconds(et.endTime) - 2;
 
       }
     });
@@ -345,9 +349,10 @@
         tag += `<tr><td id=seg_${id}>`;
         tag += `<span id=clip_${id}> ${clips[id].startTime} - ${clips[id].endTime} [${clips[id].duration}]</span> `;
         tag += "<span class=btns>";
-        tag += `<button class='segBtn' style='color:green;' id=play_${id}>&#10148;</button>`;
-        tag += `<button class='segBtn' style='color:green;' id=edit_${id}>&#9998;</button>`;
-        tag += `<button class='segBtn' style='color:red;' id=cancel_${id}>&#10060;</button>`;
+        tag += `<button class='segBtn' title='start/stop play' style='color:green;' id=play_${id}>&#10148;</button>`;
+        tag += `<button class='segBtn' title='2s before stop' style='color:black;' id=end_${id}>&#10148;</button>`;
+        tag += `<button class='segBtn' title='edit clip' style='color:blue;' id=edit_${id}>&#9998;</button>`;
+        tag += `<button class='segBtn' title='delete clip' style='color:red;' id=delete_${id}>&#128465;</button>`;
         tag += "</span>"
         tag += "</td></tr>";
       });
@@ -399,7 +404,7 @@
         SegStartFlag = true;
       } else {
         videoPlayer.pause();
-        target.innerHTML = "&#9658;";
+        target.innerHTML = "&#10148;";
         SegStartFlag = false;
 
 
