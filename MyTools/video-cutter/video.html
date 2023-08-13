@@ -168,6 +168,8 @@
     var currentTargetInSeg;
     var seekTime = 5;
     var fileName;
+    var enableEdit = false;
+    var editIndex = -1;
 
 
     //videoPlayer.addEventListener("loadeddata",()=>{});
@@ -231,7 +233,13 @@
         return;
       pstartTime = startTime_;
       pendTime = endTime_;
-      clips[idx++] = { startTime: startTime_, endTime: endTime_, duration: calculateDuration(startTime_, endTime_) };
+      let currentIdx;
+      if (enableEdit) {
+        currentIdx = editIndex;
+        enableEdit = false;
+      } else
+        currentIdx = idx++;
+      clips[currentIdx] = { startTime: startTime_, endTime: endTime_, duration: calculateDuration(startTime_, endTime_) };
       addInSegs();
     });
     clipSeg.addEventListener('click', function () {
@@ -239,7 +247,6 @@
 
       if (target && target.id?.startsWith('play_')) {
         let targetId = target.id.split("_")[1];
-
         if (target.classList.contains("active")) {
           document.querySelectorAll("[id^='play_']").forEach(a => {
             a.classList.remove("active");
@@ -268,6 +275,22 @@
         delete clips[target.id.split("_")[1]];
         addInSegs();
 
+      } else if (target && target.id?.startsWith('edit_')) {
+        if (target.classList.contains("active")) {
+          document.querySelectorAll("[id^='edit_']").forEach(a => {
+            a.classList.remove("active");
+            a.style.removeProperty('background-color');
+          });
+        } else {
+          document.querySelectorAll("[id^='edit_']").forEach(a => {
+            a.classList.remove("active");
+            a.style.removeProperty('background-color');
+          });
+          target.classList.add("active");
+          target.style.backgroundColor = 'red';
+        }
+        editInSegs(target.id.split("_")[1]);
+
       }
     });
     showHide.addEventListener('click', function () {
@@ -282,7 +305,7 @@
       let op = document.querySelector("#opFolder").value;
 
       for (let i in clips) {
-          ret += `ffmpeg -n -i ${ip}\/${fileName} -ss ${clips[i].startTime} -to ${clips[i].endTime} -c:v libx264 -c:a copy ${op}\\${fileName}<br><br>`;
+        ret += `ffmpeg -n -i ${ip}\/${fileName} -ss ${clips[i].startTime} -to ${clips[i].endTime} -c:v libx264 -c:a copy ${op}\\${fileName}<br><br>`;
       }
       document.querySelector("#savedClipTimes").innerHTML = "<div id='copyTimes'>" + ret + "</div>";
       copyTimes();
@@ -319,15 +342,33 @@
       clipSeg.insertAdjacentHTML("beforeend", "<table><tbody>");
       let tag = "";
       Object.keys(clips).forEach(id => {
-        tag += "<tr><td id=seg_" + id + ">";
-        tag += "<span id=clip_" + id + ">" + clips[id].startTime + " - " + clips[id].endTime + " [" + clips[id].duration + "]</span>"
-        tag += " <button class='segBtn' style='color:green;' id=play_" + id + ">&#9654;</button>";
-        tag += " <button class='segBtn' style='color:red;' id=cancel_" + id + ">&#10060;</button>";
+        tag += `<tr><td id=seg_${id}>`;
+        tag += `<span id=clip_${id}> ${clips[id].startTime} - ${clips[id].endTime} [${clips[id].duration}]</span> `;
+        tag += "<span class=btns>";
+        tag += `<button class='segBtn' style='color:green;' id=play_${id}>&#9654;</button>`;
+        tag += `<button class='segBtn' style='color:green;' id=edit_${id}>&#9998;</button>`;
+        tag += `<button class='segBtn' style='color:red;' id=cancel_${id}>&#10060;</button>`;
+        tag += "</span>"
         tag += "</td></tr>";
       });
       clipSeg.insertAdjacentHTML("beforeend", "<table><tbody>" + tag + "<table><tbody>");
 
 
+    }
+    function editInSegs(clipId) {
+      enableEdit = !enableEdit;
+      editIndex = clipId;
+
+      setHMS(0, clips[clipId]['startTime']);
+      setHMS(1, clips[clipId]['endTime']);
+
+      startTime_ = clips[clipId]['startTime'];
+      startTimeSec_ = convertTimeToSeconds(clips[clipId]['startTime']);
+      videoPlayer.currentTime = startTimeSec_;
+      endTime_ = clips[clipId]['endTime']
+      endTimeSec_ = convertTimeToSeconds(clips[clipId]['endTime']);
+      pstartTime = startTime_;
+      pendTime = endTime_;
     }
     function calculateDuration(startT, endT) {
       let inSec = convertTimeToSeconds(endT) - convertTimeToSeconds(startT);
@@ -403,12 +444,13 @@
     }
 
     function updateTime(inputElement, id) {
-      var inputValue = parseInt(inputElement.value, 10);
+      if (inputElement) {
+        var inputValue = parseInt(inputElement.value, 10);
 
-      if (inputValue < 10) {
-        inputElement.value = padWithZero(inputValue);
+        if (inputValue < 10) {
+          inputElement.value = padWithZero(inputValue);
+        }
       }
-
       var hours = padWithZero(document.getElementById('hours_' + id).value);
       var minutes = padWithZero(document.getElementById('minutes_' + id).value);
       var seconds = padWithZero(document.getElementById('seconds_' + id).value);
