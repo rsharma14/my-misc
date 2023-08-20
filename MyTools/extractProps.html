@@ -1,92 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Extract properties</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body>
-    <div class="container">
-      <textarea id="rawprops" rows="10" cols="50"></textarea>
-      <button type="button" onclick="formatProps()">Extract</button>
-	  
-	        <button type="button" id="copyProp" style="display:none" onclick="selectText('properties')">Copy</button>
 
-      <div id="properties"></div>
-    </div>
+<head>
+  <title>Extract properties</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
 
-    <script>
-      function formatProps(e) {
-        var a = document.getElementById("rawprops").value;
-         a = a.replaceAll(/\n/gi, "");
+<body>
+  <div class="container">
+    <textarea id="rawprops" rows="10" cols="50"></textarea>
+    <button type="button" onclick="formatProps()">Extract</button>
 
-        //console.log(JSON.stringify(a));
-        //console.log(a);
-        a = JSON.parse(a);
-        a=a.propertySources? a:getProp(a);
-        console.log(a);
+    <button type="button" id="copyProp" style="display:none" onclick="selectText('properties')">Copy</button>
 
-        var props = "";
+    <div id="properties"></div>
+  </div>
+
+  <script>
+    var filterData = ["jwtFilterFlag", "db.mongo.uri", "pubKeyString"];
+    var props = "";
+
+    function formatProps(e) {
+      var rawprops = document.getElementById("rawprops").value;
+      rawprops = rawprops.replaceAll(/\n/gi, "");
+
+      rawprops = JSON.parse(rawprops);
+      rawprops = rawprops.propertySources ? rawprops : getProp(rawprops);
+      console.log(rawprops);
+
+
+      //just taking applicationConfig props
+      var b = rawprops.propertySources
+        .filter((t) => t.name.startsWith("applicationConfig"))
+        .flatMap((a) => a.properties);
+
+      b.forEach((c) => {
         props +=
-          "<br>#======================systemEnvironment==========================#<br>";
-		  try{
-		          props +="pubKeyString=" +a.propertySources.filter((t) => t.name.startsWith("systemEnvironment")).flatMap((a) => a.properties)[0]["pubKeyString"]['value']+ "<br>";
-		  }catch(err){		  
-		  }
-		   try{
-		          props +="db.mongo.uri=" +a.propertySources.filter((t) => t.name.startsWith("systemEnvironment")).flatMap((a) => a.properties)[0]["db.mongo.uri"]['value']+ "<br>";
-		  }catch(err){		  
-		  }
-
-        //just taking applicationConfig props
-        var b = a.propertySources
-          .filter((t) => t.name.startsWith("applicationConfig"))
-          .flatMap((a) => a.properties);
-        //var b=a.propertySources.flatMap(a=>a.properties);
-        //console.log(b);
-        b.forEach((c) => {
-          props +=
-            "<br>#=======================applicationConfig=========================#<br>";
-          //console.log(i+'='+x[i]['value']);
-          for (var i in c) props += i + "=" + c[i]["value"] + "<br>";
-        });
-        //console.log(props);
-
-        document.getElementById("properties").innerHTML = props;
-        document.getElementById("copyProp").style="display:block"
- }
-
-      function selectText(token) {
-        if (document.selection) {
-          // IE
-          var range = document.body.createTextRange();
-          range.moveToElementText(document.getElementById(token));
-          range.select();
-        } else if (window.getSelection) {
-          var range = document.createRange();
-          range.selectNode(document.getElementById(token));
-          window.getSelection().removeAllRanges();
-          window.getSelection().addRange(range);
-          document.execCommand("copy");
+          "<br>#=======================applicationConfig=========================#<br>";
+        //console.log(i+'='+x[i]['value']);
+        for (var i in c) {
+          if (!filterData.includes(i))
+            props += i + "=" + c[i]["value"] + "<br>";
+          filterData.push(i);
         }
-      }
-      
-      function getProp(a){
-      let r={propertySources:[]};
-      let k=Object.keys(a);
-       o={};
-      Object.keys(a).forEach(k=>{
-      console.log(a[k]);
-      let co={};
-      Object.keys(a[k]).forEach(k2=>{
-      co[k2]={value:a[k][k2]}
       });
+      props += "jwtFilterFlag=false<br>";
+      //console.log(props);
+      props += "<br>#======================systemEnvironment==========================#<br>";
+      props += checkAndAdd("pubKeyString", rawprops, "systemEnvironment");
+      props += checkAndAdd("db.mongo.uri", rawprops, "systemEnvironment");
 
-      r.propertySources.push({name:k,properties:co});
-      });
-console.log(r)
-      return r;
+      document.getElementById("properties").innerHTML = props;
+      document.getElementById("copyProp").style = "display:block"
+    }
+
+
+    function checkAndAdd(key, props, env) {
+      try {
+        return (key + "=" + props.propertySources.filter((t) => t.name.startsWith(env))
+          .flatMap((a) => a.properties)[0][key]['value'] + "<br>");
+      } catch (err) {
       }
-    </script>
-  </body>
+      return "";
+    }
+
+    function selectText(token) {
+      if (document.selection) {
+        // IE
+        var range = document.body.createTextRange();
+        range.moveToElementText(document.getElementById(token));
+        range.select();
+      } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById(token));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand("copy");
+      }
+    }
+
+    function getProp(a) {
+      let r = { propertySources: [] };
+      let k = Object.keys(a);
+      o = {};
+      Object.keys(a).forEach(k => {
+        console.log(a[k]);
+        let co = {};
+        Object.keys(a[k]).forEach(k2 => {
+          co[k2] = { value: a[k][k2] }
+        });
+
+        r.propertySources.push({ name: k, properties: co });
+      });
+      console.log(r)
+      return r;
+    }
+  </script>
+</body>
+
 </html>
