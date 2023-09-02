@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tool for BMOC to run tasks </title>
+</head>
+
+<body>
+    <h1>Tool for BMOC to run tasks upto specified taskname</h1>
+    <fieldset>
+        <legend>Url:</legend>
+        Init Url: <input type="text" id="initUrl">
+        Submit task Url: <input type="text" id="submitTaskUrl">
+    </fieldset>
+    <fieldset>
+        <legend>Requests</legend>
+        <button type="button" id="addTextField">Add Text Field</button>
+        <button type="button" id="removeTextField">Remove Last Field</button>
+        <div id="textFieldContainer">
+            <div id="div_0"><label id="label_0">Init Req: </label><input type="text" id="text_0" data-id="0"
+                    autocomplete="on" name="textFields[]"></div>
+            <div id="div_1">
+                <label id="label_1">Submit task Req: </label><input type="text" id="text_1" data-id="1"
+                    autocomplete="on" name="textFields[]" onchange="onFieldChange(this)">
+            </div>
+        </div>
+        <button type="button" id="submitData">Submit</button>
+    </fieldset>
+
+
+    <script>
+        // Function to add a new text field
+        var count = 2;
+        const container = document.getElementById('textFieldContainer');
+
+        container.addEventListener('click', function () {
+            var target = event.target;
+            if (target && target.id?.startsWith('play_')) {
+            }
+        });
+
+        function addTextField() {
+
+            //container.appendChild(newTextField);
+            console.log(`<label id="label_${count}"></label><input type='text' data-id=${count} name='textFields[]'>`)
+            container.insertAdjacentHTML("beforeend", `<div id='div_${count}'><label id="label_${count}">Submit task Req: </label><input type='text' id='text_${count}' data-id=${count} name='textFields[]' onchange=onFieldChange(this)></div>`);
+            count++
+        }
+
+        // Function to remove the last text field
+        function removeTextField() {
+            if (count < 3) return;
+            count--;
+            const container = document.getElementById('textFieldContainer');
+            const textFields = document.getElementById(`div_${count}`);
+            container.removeChild(textFields);
+
+        }
+        function onFieldChange(t) {
+
+            if (isJSON(t.value)) {
+                let data = JSON.parse(t.value);
+                document.querySelector("#label_" + t.getAttribute("data-id")).innerHTML = data.taskName + ": ";
+
+            }
+        }
+
+        function submitData() {
+            var textFields = document.querySelectorAll("input[id^='text_']");
+            let initUrl = document.getElementById("initUrl").value;
+            let submitTaskUrl = document.getElementById("submitTaskUrl").value;
+            let allReq = [];
+            document.querySelectorAll("[id^=label_]").forEach(a => {
+                a.removeAttribute("style");
+            });
+
+            textFields.forEach((a, i) => {
+                if (i == 0)
+                    allReq.push({ id: i, url: initUrl, method: "POST", req: JSON.parse(a.value) });
+                else
+                    allReq.push({ id: i, url: submitTaskUrl, method: "PUT", req: JSON.parse(a.value) });
+
+            });
+            callRecursively(allReq, allReq.splice(0, 1)[0]);
+
+        }
+
+        function callRecursively(allReq, req) {
+
+            console.log("--------");
+            console.log(req.req);
+            document.getElementById("label_" + req.id).style.backgroundColor = "GREY";
+            callApi(req.url, req.method, req.req, (d) => {
+                console.log(d);
+                document.getElementById("label_" + req.id).style.backgroundColor = "GREEN";
+                if (allReq.length == 0) {
+                    console.log("---All Done---")
+                    return;
+                }
+
+                let req_ = allReq.splice(0, 1)[0];
+                req_.req.orderRefNumber = d.orderRefNumber;
+                req_.req.processInstanceId = d.processInstanceId;
+                req_.req.taskId = d.taskId;
+                req_.req.taskName = d.taskName;
+
+                callRecursively(allReq, req_);
+            });
+        }
+        function isJSON(jsonStr) {
+            try {
+                JSON.parse(jsonStr);
+                console.log("valid json");
+                return true;
+            } catch (e) {
+                console.log("not valid json");
+                return false;
+            }
+        }
+        async function callApi(api, method, requestData, cb) {
+
+            fetch(api, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Bmpauthorization': 'BMPAPP eyJ1c2VySWQiOiJCTVBBUFAiLCJhbGciOiJSUzUxMiIsImtpZCI6IkJNQ0FNVU5EQSJ9.Qmx1ZSBNYXJibGUgc2VjcmV0IHBhc3NwaHJhc2UgZ29lcyBoZXJl.Zk2A7FL4o2oLmO-DOYn2x6Zw-gi474ganH5Vqlit0uc_Dd5aMyehTt_6IEfJrKd_G4qGxXXG3yBnbEL--3IkwGpPtlCXu1S_gEgh45AL__M4vT28wtI6p5_DxBkrG95NjwbkLn39lynpBHIFQya0qdzuey-LnuumjCqeDP6_TI4'
+                },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    cb(data);
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                });
+        }
+
+        document.getElementById('addTextField').addEventListener('click', addTextField);
+        document.getElementById('removeTextField').addEventListener('click', removeTextField);
+        document.getElementById("submitData").addEventListener("click", submitData);
+
+    </script>
+</body>
+
+</html>
