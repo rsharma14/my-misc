@@ -3,10 +3,19 @@
 
 <head>
     <title>Tool for BMOC to run tasks </title>
+    <style>
+        [id^="div_"] {
+            margin: 5px;
+        }
+
+        [id^="label_"] {
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Tool for BMOC to run tasks upto specified taskname</h1>
+    <h1 style="background-color: blue;">Tool for BMOC to run tasks upto specified taskname</h1>
     <fieldset>
         <legend>Url:</legend>
         Init Url: <input type="text" id="initUrl">
@@ -14,8 +23,10 @@
     </fieldset>
     <fieldset>
         <legend>Requests</legend>
-        <button type="button" id="addTextField">Add Text Field</button>
-        <button type="button" id="removeTextField">Remove Last Field</button>
+        <div id="div_b1">
+            <button type="button" id="addTextField">Add Text Field</button>
+            <button type="button" id="removeTextField">Remove Last Field</button>
+        </div>
         <div id="textFieldContainer">
             <div id="div_0"><label id="label_0">Init Req: </label><input type="text" id="text_0" data-id="0"
                     autocomplete="on" name="textFields[]"></div>
@@ -43,7 +54,7 @@
 
             //container.appendChild(newTextField);
             console.log(`<label id="label_${count}"></label><input type='text' data-id=${count} name='textFields[]'>`)
-            container.insertAdjacentHTML("beforeend", `<div id='div_${count}'><label id="label_${count}">Submit task Req: </label><input type='text' id='text_${count}' data-id=${count} name='textFields[]' onchange=onFieldChange(this)></div>`);
+            container.insertAdjacentHTML("beforeend", `<div id='div_${count}'><label id="label_${count}">Submit task Req: </label><input type='text' id='text_${count}' data-id=${count} name='textFields[]' onchange=onFieldChange(this)><button type='button'  id='task_${count}' onclick=runTask(this)>Run</button></div>`);
             count++
         }
 
@@ -64,7 +75,15 @@
 
             }
         }
-
+        function runTask(t) {
+            console.log(t.id)
+            let submitTaskUrl = document.getElementById("submitTaskUrl").value;
+            let req = document.getElementById("text_" + (t.id.split("_")[1])).value;
+            callApi(submitTaskUrl, "PUT", JSON.parse(req)
+                , (d) => {
+                    console.log(d)
+                })
+        }
         function submitData() {
             var textFields = document.querySelectorAll("input[id^='text_']");
             let initUrl = document.getElementById("initUrl").value;
@@ -89,10 +108,12 @@
 
             console.log("--------");
             console.log(req.req);
-            document.getElementById("label_" + req.id).style.backgroundColor = "GREY";
+            document.getElementById("label_" + req.id).style.backgroundColor = "grey";
+            document.getElementById("text_"+req.id).value=JSON.stringify(req.req);
+
             callApi(req.url, req.method, req.req, (d) => {
                 console.log(d);
-                document.getElementById("label_" + req.id).style.backgroundColor = "GREEN";
+                document.getElementById("label_" + req.id).style.backgroundColor = "lightgreen";
                 if (allReq.length == 0) {
                     console.log("---All Done---")
                     return;
