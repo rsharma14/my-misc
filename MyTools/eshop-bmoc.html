@@ -37,6 +37,7 @@
         </div>
         <button type="button" id="submitData">Submit</button>
     </fieldset>
+    <div id="errMsg"></div>
 
 
     <script>
@@ -79,9 +80,19 @@
             console.log(t.id)
             let submitTaskUrl = document.getElementById("submitTaskUrl").value;
             let req = document.getElementById("text_" + (t.id.split("_")[1])).value;
+            document.getElementById("errMsg").innerHTML = '';
+
             callApi(submitTaskUrl, "PUT", JSON.parse(req)
                 , (d) => {
-                    console.log(d)
+                    console.log(d);
+                    if (d.hasOwnProperty('errorResponse') && d.errorResponse.length > 0) {
+                        document.getElementById("errMsg").innerHTML = getErr(d.errorResponse[0]);
+                        document.getElementById("label_" + req.id).style.backgroundColor = "lightgreen";
+
+                        return;
+                    }
+                    document.getElementById("label_" + req.id).style.backgroundColor = "lightgreen";
+
                 })
         }
         function submitData() {
@@ -104,15 +115,30 @@
 
         }
 
+        function getErr(err) {
+            let t = '';
+            for (let i of Object.keys(err))
+                t += `${i}: ${err[i]}<br>`;
+
+            return t;
+
+        }
         function callRecursively(allReq, req) {
 
             console.log("--------");
             console.log(req.req);
             document.getElementById("label_" + req.id).style.backgroundColor = "grey";
-            document.getElementById("text_"+req.id).value=JSON.stringify(req.req);
+            document.getElementById("text_" + req.id).value = JSON.stringify(req.req);
+            document.getElementById("errMsg").innerHTML = '';
 
             callApi(req.url, req.method, req.req, (d) => {
                 console.log(d);
+                if (d.hasOwnProperty('errorResponse') && d.errorResponse.length > 0) {
+                    document.getElementById("errMsg").innerHTML = getErr(d.errorResponse[0]);
+                    document.getElementById("label_" + req.id).style.backgroundColor = "red";
+
+                    return;
+                }
                 document.getElementById("label_" + req.id).style.backgroundColor = "lightgreen";
                 if (allReq.length == 0) {
                     console.log("---All Done---")
