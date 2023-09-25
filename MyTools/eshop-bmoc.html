@@ -150,9 +150,22 @@
                 req_.req.processInstanceId = d.processInstanceId;
                 req_.req.taskId = d.taskId;
                 req_.req.taskName = d.taskName;
+                specialTreatmentOnReq(req_, d);
 
                 callRecursively(allReq, req_);
             });
+        }
+        var oldAppts = [];  //seems not required
+        function specialTreatmentOnReq(req, prevResp) {
+            switch (req.req.taskName) {
+                case "Confirm Scheduling":
+                    oldAppts.push(req.req.payload.availableAppointment.appointmentId);
+                    req.req.payload.availableAppointment = prevResp.payload.appointmentInfo.availableAppointment[0];
+                    break;
+
+                default:
+                    break;
+            }
         }
         function isJSON(jsonStr) {
             try {

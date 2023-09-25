@@ -9,19 +9,19 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MyApps {
+public class StartApps {
 
 	private ClassLoader classLoader = this.getClass().getClassLoader();
 
-	private Set<MyPojo> tools = readFile("apps.txt");
+	private Set<App> tools = readFile("apps.txt");
 
 
-	Set<String> selected = tools.stream().filter(a -> a.getIsDefault()).map(MyPojo::getLoc)
+	Set<String> selected = tools.stream().filter(a -> a.getIsDefault()).map(App::getLoc)
 			.collect(Collectors.toSet());
 
-	MyApps() {
+	StartApps() {
 
-		JFrame f = new JFrame("My Tools");
+		JFrame f = new JFrame("Startup Apps");
 		final JLabel label = new JLabel();
 		label.setHorizontalAlignment(JLabel.CENTER);
 		label.setSize(400, 100);
@@ -35,7 +35,7 @@ public class MyApps {
 		mainPanel.setBounds(1,1,370,200);
 
 
-		for (MyPojo cb : tools) {
+		for (App cb : tools) {
 			jcheckbox = new JCheckBox(cb.getName());
 			jcheckbox.setName(cb.getLoc());
 			jcheckbox.setSelected(cb.getIsDefault());
@@ -102,17 +102,17 @@ public class MyApps {
 	}
 
 	public static void main(String args[]) {
-		new MyApps();
+		new StartApps();
 	}
 
-	private Set<MyPojo> readFile(String file) {
-		Set<MyPojo> links = new HashSet<>();
+	private Set<App> readFile(String file) {
+		Set<App> links = new HashSet<>();
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(file)))) {
 
 			String line = null;
 			while ((line = br.readLine()) != null) {
-				links.add(new MyPojo(line.split("==")[0].trim(), line.split("==")[1].trim(),
+				links.add(new App(line.split("==")[0].trim(), line.split("==")[1].trim(),
 						Boolean.parseBoolean(line.split("==")[2].trim())));
 			}
 		} catch (Exception e) {
@@ -122,15 +122,15 @@ public class MyApps {
 	}
 }
 
-class MyPojo {
+class App {
 	private String name;
 	private String loc;
 	private boolean isDefault;
 
-	public MyPojo() {
+	public App() {
 	}
 
-	public MyPojo(String name, String loc, boolean isDefault) {
+	public App(String name, String loc, boolean isDefault) {
 		super();
 		this.name = name;
 		this.loc = loc;
@@ -165,8 +165,8 @@ class MyPojo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MyPojo myPojo = (MyPojo) o;
-        return isDefault == myPojo.isDefault && Objects.equals(getName(), myPojo.getName()) && Objects.equals(getLoc(), myPojo.getLoc());
+        App App = (App) o;
+        return isDefault == App.isDefault && Objects.equals(getName(), App.getName()) && Objects.equals(getLoc(), App.getLoc());
     }
 
     @Override
@@ -176,7 +176,7 @@ class MyPojo {
 	
 	@Override
 	public String toString() {
-		return "MyPojo [name=" + name + ", loc=" + loc + ", isDefault=" + isDefault + "]";
+		return "App [name=" + name + ", loc=" + loc + ", isDefault=" + isDefault + "]";
 	}
 
 }
