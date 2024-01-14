@@ -51,7 +51,7 @@
       background-color: #ababab;
       padding: 10px;
       text-align: center;
-      display: inline-block;
+      display: flex;
     }
 
     .query {
@@ -110,7 +110,6 @@
     }
 
     .toggle-label {
-      position: absolute;
       padding: 10px;
       margin: 5px;
       background-color: #148014;
@@ -182,15 +181,19 @@
 
     <div class="bottom-fixed">
       <input type="checkbox" onchange="showAttrib(this)">
-
       <textarea rows="2" id="query" placeholder="Enter your query here..."></textarea>
       <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
       <label for="toggle-checkbox" class="toggle-label"></label>
     </div>
 
+
+
     <div id="attrib" style="display: none;">
       <input type="text" placeholder="token" id="token"><br>
-      <input type="text" placeholder="conversion id" id="cid">
+      <input type="text" placeholder="conversion id" id="cid"><br>
+      <select name="gpt" id="gpt" onchange="gpt = parseInt(this.value)">
+        <option value="1">OpenAI GPT</option>
+        <option value="2">Converse GPT</option>
     </div>
   </div>
 
