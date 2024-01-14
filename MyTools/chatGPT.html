@@ -268,16 +268,23 @@
 
     }
 
+    var conversation_id = "";
+    var parent_message_id = "";
+
     function openaiGPT(q, t, c) {
 
-      eventSource = new EventSource(`https://merawork.in/api/backapp-service/gpt/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&cid=${c}`);
+      eventSource = new EventSource(`https://merawork.in/api/backapp-service/gpt/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
       eventSource.addEventListener("message", (e) => {
         let p = parse(e.data);
+        console.log(p)
         if (!p) return;
 
         if (p.is_completion) {
+          conversation_id = p.conversation_id;
+          parent_message_id = p.id;
+
+          clickCB();
           addToHistory(q);
-          closeStream();
           markedSyntax();
 
         } else {
@@ -294,12 +301,13 @@
       eventSource = new EventSource(`https://merawork.in/api/backapp-service/gpt/converse-gpt?q=${encodeURIComponent(q)}`);
       let i = 0;
       eventSource.addEventListener("message", (e) => {
+        console.log(e);
         if (i++ == 0)
           document.querySelector(`#data_${conversionIdx}`).innerHTML = '';
 
         if (e.data.indexOf("DONE") > 0) {
+          clickCB();
           addToHistory(q);
-          closeStream();
           markedSyntax();
         } else {
           let a = JSON.parse(e.data);
@@ -311,8 +319,9 @@
       });
     }
     function errorStream() {
+      console.log("error stream");
       eventSource.addEventListener("error", (e) => {
-        closeStream()
+        clickCB();
         document.querySelector(`#data_${conversionIdx}`).innerHTML = "error";
         console.log(e);
 
@@ -320,9 +329,10 @@
 
     }
     function closeStream() {
+      if (!eventSource) return;
       console.log("closed stream");
-      clickCB();
       eventSource.close();
+      eventSource = null;
     }
 
     function scrollToBottom(id) {
