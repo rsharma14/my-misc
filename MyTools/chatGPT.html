@@ -8,14 +8,49 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 
   <style>
-    html,
     body {
-      height: 100%;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      scroll-behavior: smooth;
-
     }
+
+    .chat-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .history-tab {
+      flex: 1;
+      padding: 10px;
+      background-color: #000;
+      overflow-y: auto;
+      max-width: 250px;
+    }
+
+    .history-message {
+      margin-bottom: 10px;
+    }
+
+    .content-container {
+      flex: 2;
+      padding: 10px;
+      background-color: rgb(211 247 213);
+
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .search-box {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
 
     .break-words {
       word-wrap: break-word;
@@ -25,44 +60,11 @@
       white-space: pre-wrap;
     }
 
-    .container {
-      position: relative;
-      min-height: 100%;
-      background-color: rgb(211 247 213);
-      /*margin-left: auto;
-      margin-right: auto;
-      width: 75%;*/
-      font-family: sans-serif;
-      display: flex;
-
-    }
-
-    .content {
-      padding: 10px;
-      overflow: auto;
-      height: 500px;
-    }
-
-    .bottom-fixed {
-      position: fixed;
-      left: 0;
-      bottom: 0px;
-      width: 100%;
-      background-color: #ababab;
-      padding: 10px;
-      text-align: center;
-      display: flex;
-    }
-
     .query {
       background: antiquewhite;
       font-size: 17px;
       padding: 7px;
       margin-bottom: 10px;
-    }
-
-    .conversion {
-      display: block;
     }
 
     .copy {
@@ -84,7 +86,7 @@
     }
 
     textarea {
-      min-width: 70%;
+      min-width: 80%;
       max-width: 600px;
       min-height: 50px;
       max-height: 50px;
@@ -131,21 +133,8 @@
       content: "\27A4";
     }
 
-    .left-div {
-      flex: 0 0 20%;
-      background-color: black;
-      padding: 5px;
-      display: block;
-    }
-
-    .right-div {
-      flex: 1;
-      background-color: lightgreen;
-      padding: 5px;
-    }
-
     @media screen and (max-width: 800px) {
-      .left-div {
+      .history-tab {
         display: none;
         /* Hide left div on screens with width 500px or less */
       }
@@ -167,26 +156,24 @@
 </head>
 
 <body>
-  <div class="container">
-
-    <div class="left-div content">
+  <div class="chat-container">
+    <div class="history-tab">
       <h3 style="color: #0f0;text-align: center;">Chat History</h3>
       <hr>
       <div id="chatHistory"></div>
     </div>
-
-    <div class="right-div">
+    <div class="content-container">
       <div class="content" id="content"> </div>
+
+      <div class="search-box">
+        <input type="checkbox" onchange="showAttrib(this)">
+
+        <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse</textarea>
+        <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
+        <label for="toggle-checkbox" class="toggle-label"></label>
+      </div>
+
     </div>
-
-    <div class="bottom-fixed">
-      <input type="checkbox" onchange="showAttrib(this)">
-      <textarea rows="2" id="query" placeholder="Enter your query here..."></textarea>
-      <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
-      <label for="toggle-checkbox" class="toggle-label"></label>
-    </div>
-
-
 
     <div id="attrib" style="display: none;">
       <input type="text" placeholder="token" id="token"><br>
@@ -206,11 +193,13 @@
     let chatHistory = parse(localStorage.getItem("chatHistory"));
     chatHistory = chatHistory ? chatHistory : [];
     var query, token, cid;
+    var conversation_id = "";
+    var parent_message_id = "";
 
     (function showChatHistory(params) {
-      let h = [];
-      chatHistory.forEach(element => {
-        addToHistoryDiv(element);
+
+      chatHistory.forEach(h => {
+        addToHistoryDiv(h);
       });
 
     })();
@@ -226,18 +215,20 @@
       var a = createEl("a", null, "nodec historyAnchor");
       a.href = "javascript:void(0)";
       a.onclick = function () { pickHistoryChat(this, h); };
-      a.appendChild(document.createTextNode(h));
+      a.appendChild(document.createTextNode(h[0]));
       document.getElementById("chatHistory").prepend(a);
     }
     function addToHistory(q) {
-
-      chatHistory.push(q);
+      let h = [q, conversation_id, parent_message_id];
+      chatHistory.push(h);
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-      addToHistoryDiv(q);
+      addToHistoryDiv(h);
     }
 
     function pickHistoryChat(e, q) {
-      document.getElementById("query").value = q;
+      document.getElementById("query").value = q[0];
+      conversation_id = q[1];
+      parent_message_id = q[2];
       clickCB();
     }
     function clickCB() {
@@ -267,9 +258,6 @@
       errorStream();
 
     }
-
-    var conversation_id = "";
-    var parent_message_id = "";
 
     function openaiGPT(q, t, c) {
 
@@ -306,6 +294,9 @@
           document.querySelector(`#data_${conversionIdx}`).innerHTML = '';
 
         if (e.data.indexOf("DONE") > 0) {
+
+          conversation_id = 100;
+          parent_message_id = 200;
           clickCB();
           addToHistory(q);
           markedSyntax();
