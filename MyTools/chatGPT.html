@@ -243,6 +243,11 @@
       query = document.getElementById("query").value;
       token = document.getElementById("token").value;
       cid = document.getElementById("cid").value;
+      if (!query || query.trim().length <= 0) {
+        clickCB();
+        return;
+      }
+
 
       createConversionBlock(++conversionIdx);
       insertQuery(query);
