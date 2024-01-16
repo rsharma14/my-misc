@@ -168,12 +168,16 @@
       border-radius: 5px 5px 0px 0px;
 
     }
+
+    .nodisp {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
   <div class="chat-container">
-    <div class="history-tab">
+    <div class="history-tab" id="history-tab">
       <h3 style="color: #0f0;text-align: center;">Chat History</h3>
       <hr>
       <div id="chatHistory"></div>
@@ -183,6 +187,7 @@
 
       <div class="search-box">
         <input type="checkbox" onchange="showAttrib(this)">
+        <input type="checkbox" onchange='document.getElementById("history-tab").classList.toggle("nodisp");'>
 
         <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse,html code</textarea>
         <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
