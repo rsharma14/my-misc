@@ -138,7 +138,7 @@
     }
 
     @media screen and (max-width: 800px) {
-      .history-tab {
+      .history-tab1 {
         display: none;
         /* Hide left div on screens with width 500px or less */
       }
@@ -186,8 +186,9 @@
       <div class="content" id="content"> </div>
 
       <div class="search-box">
-        <input type="checkbox" onchange="showAttrib(this)">
+
         <input type="checkbox" onchange='document.getElementById("history-tab").classList.toggle("nodisp");'>
+        <input type="checkbox" onchange='document.getElementById("attrib").classList.toggle("nodisp");'><br>
 
         <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse,html code</textarea>
         <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
@@ -196,7 +197,7 @@
 
     </div>
 
-    <div id="attrib" style="display: none;">
+    <div id="attrib" class="nodisp">
       <input type="text" placeholder="token" id="token"><br>
       <input type="text" placeholder="conversion id" id="cid"><br>
       <select name="gpt" id="gpt" onchange="gpt = parseInt(this.value)">
@@ -207,7 +208,7 @@
 
 
   <script>
-    let gpt = 2;
+    let gpt = 1;
     let eventSource;
     let conversionIdx = 0;
     let resp = '';
@@ -224,14 +225,6 @@
       });
 
     })();
-    function showAttrib(e) {
-      if (e.checked) {
-        document.getElementById("attrib").style.display = "block";
-      } else {
-        document.getElementById("attrib").style.display = "none";
-      }
-    }
-
     function addToHistoryDiv(h) {
       var a = createEl("a", null, "nodec historyAnchor");
       a.href = "javascript:void(0)";
@@ -366,7 +359,7 @@
       return null;
     }
     function markedSyntax(e) {
-      let rawText = document.querySelector(`#data_${conversionIdx}`).innerHTML;
+      let id = `data_${conversionIdx}`;
       const renderer = new marked.Renderer();
       renderer.code = (code, language) => {
         const lang = language && hljs.getLanguage(language);
@@ -376,7 +369,10 @@
       marked.setOptions({
         renderer: renderer
       });
-      document.querySelector(`#data_${conversionIdx}`).innerHTML = marked.parse(htmlDecode(rawText));
+      document.getElementById(`conv_${conversionIdx}`).classList.toggle("whitespace-pre-wrap");
+      let rawText = document.getElementById(id).innerHTML;
+      document.getElementById(id).innerHTML = marked.parse(htmlDecode(rawText));
+
 
     }
     function copyBlock(token) {
