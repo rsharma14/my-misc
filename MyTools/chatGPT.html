@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CHAT GPT</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
     body {
@@ -24,6 +25,7 @@
       padding: 10px;
       background-color: #000;
       overflow-y: auto;
+      overflow-x: hidden;
       max-width: 250px;
     }
 
@@ -33,20 +35,22 @@
 
     .content-container {
       flex: 2;
-      padding: 10px;
-      background-color: rgb(211 247 213);
-
+      padding: 2px;
       display: flex;
       flex-direction: column;
+      background-color: rgb(73, 228, 81);
+
     }
 
     .content {
       flex: 1;
       overflow-y: auto;
+      background-color: rgb(211 247 213);
+      padding: 4px;
     }
 
     .search-box {
-      margin-top: 20px;
+      margin-top: 10px;
       display: flex;
       justify-content: center;
     }
@@ -156,6 +160,14 @@
     #chatHistory {
       white-space: nowrap;
     }
+
+    .code-header {
+      display: flex;
+      background-color: #b3acac;
+      padding: 2px;
+      border-radius: 5px 5px 0px 0px;
+
+    }
   </style>
 </head>
 
@@ -172,7 +184,7 @@
       <div class="search-box">
         <input type="checkbox" onchange="showAttrib(this)">
 
-        <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse</textarea>
+        <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse,html code</textarea>
         <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
         <label for="toggle-checkbox" class="toggle-label"></label>
       </div>
@@ -190,7 +202,7 @@
 
 
   <script>
-    let gpt = 1;
+    let gpt = 2;
     let eventSource;
     let conversionIdx = 0;
     let resp = '';
@@ -252,9 +264,10 @@
         return;
       }
 
-
       createConversionBlock(++conversionIdx);
       insertQuery(query);
+      scrollToBottom("content");
+
       document.querySelector(`#data_${conversionIdx}`).innerHTML = '<div class="blink_me">Processing...</div>';
       if (gpt === 1) {
         console.log("openaiGPT");
@@ -272,6 +285,8 @@
 
       eventSource = new EventSource(`https://merawork.in/api/backapp-service/gpt/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
       eventSource.addEventListener("message", (e) => {
+        scrollToBottom("content");
+
         let p = parse(e.data);
         console.log(p)
         if (!p) return;
@@ -289,8 +304,6 @@
           document.querySelector(`#data_${conversionIdx}`).innerHTML = escapeHtml(resp);
 
         }
-        scrollToBottom("content");
-
       });
     }
 
@@ -298,7 +311,8 @@
       eventSource = new EventSource(`https://merawork.in/api/backapp-service/gpt/converse-gpt?q=${encodeURIComponent(q)}`);
       let i = 0;
       eventSource.addEventListener("message", (e) => {
-        console.log(e);
+        //console.log(e);
+        scrollToBottom("content");
         if (i++ == 0)
           document.querySelector(`#data_${conversionIdx}`).innerHTML = '';
 
@@ -314,12 +328,12 @@
           resp = a.choices.map(a => a.delta.content).join();
           document.querySelector(`#data_${conversionIdx}`).innerHTML += escapeHtml(resp);
         }
+        //console.log(resp)
 
-        scrollToBottom("content");
       });
     }
     function errorStream() {
-      console.log("error stream");
+      //console.log("error stream");
       eventSource.addEventListener("error", (e) => {
         clickCB();
         document.querySelector(`#data_${conversionIdx}`).innerHTML = "error";
@@ -347,16 +361,21 @@
       return null;
     }
     function markedSyntax(e) {
-      if (!e || e.checked) {
-        const regexCode = /```(?<lang>\w*)\n+(?<code>.*?)```/gs
-        let rawText = document.querySelector(`#data_${conversionIdx}`).innerHTML
-        document.querySelector(`#data_${conversionIdx}`).innerHTML = rawText.replaceAll(regexCode, '<div><div class="copy"><a href="javascript:void(0)" onclick="copyBlock(this)">copy</a></div><div><pre><code class="language-$1">$2</code></pre></div></div>')
-        hljs.highlightAll();
+      let rawText = document.querySelector(`#data_${conversionIdx}`).innerHTML;
+      const renderer = new marked.Renderer();
+      renderer.code = (code, language) => {
+        const lang = language && hljs.getLanguage(language);
+        const cd = lang ? hljs.highlight(code, { language }).value : hljs.highlightAuto(code).value;
+        return `<div><div class="code-header"><span style="margin-right: auto;">${language}</span><span style="margin-left: auto;"><a href="javascript:void(0)" onclick="copyBlock(this)" class="nodec">copy &#10064;</a></span></div><pre><code class="hljs ${language}">${cd}</code></pre></div>`;
       }
+      marked.setOptions({
+        renderer: renderer
+      });
+      document.querySelector(`#data_${conversionIdx}`).innerHTML = marked.parse(htmlDecode(rawText));
 
     }
     function copyBlock(token) {
-      console.log(token);
+      //console.log(token);
       if (document.selection) {
         // IE
         var range = document.body.createTextRange();
@@ -364,7 +383,7 @@
         range.select();
       } else if (window.getSelection) {
         var range = document.createRange();
-        range.selectNode(token.parentNode.nextSibling);
+        range.selectNode(token.parentNode.parentNode.nextSibling);
         window.getSelection().removeAllRanges();
         window.getSelection().addRange(range);
         document.execCommand("copy");
@@ -406,6 +425,11 @@
       return txt?.replaceAll('&', '&amp;').replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    }
+    function htmlDecode(input) {
+      var e = document.createElement('textarea');
+      e.innerHTML = input;
+      return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
     }
   </script>
 
