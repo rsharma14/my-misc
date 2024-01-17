@@ -111,6 +111,8 @@
       box-sizing: border-box;
       resize: none;
       border-radius: 8px;
+      overflow: hidden;
+      padding-right: 45px;
     }
 
     .blink_me {
@@ -129,12 +131,14 @@
     }
 
     .toggle-label {
-      padding: 10px;
-      margin: 5px;
+      padding: 5px;
+      margin: 10px;
       background-color: #148014;
       color: #fff;
       cursor: pointer;
       content: "Toggle";
+      right: 45px;
+      position: relative;
 
     }
 
@@ -151,7 +155,7 @@
     }
 
     @media screen and (max-width: 800px) {
-      .history-tab1 {
+      .history-tab {
         display: none;
         /* Hide left div on screens with width 500px or less */
       }
@@ -183,14 +187,14 @@
     }
 
     .nodisp {
-      display: none;
+      display: none !important;
     }
   </style>
 </head>
 
 <body>
   <div class="chat-container">
-    <div class="history-tab" id="history-tab">
+    <div class="history-tab" id="history-tab" style="display: block;">
       <h3 style="color: #0f0;text-align: center;">Chat History</h3>
       <hr>
       <div id="chatHistory"></div>
@@ -206,6 +210,7 @@
       </div>
 
     </div>
+
 
     <div id="attrib" class="nodisp">
       <input type="text" placeholder="token" id="token"><br>
