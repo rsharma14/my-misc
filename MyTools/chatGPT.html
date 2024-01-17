@@ -39,6 +39,7 @@
       display: flex;
       flex-direction: column;
       background-color: rgb(73, 228, 81);
+      overflow: hidden;
 
     }
 
@@ -69,6 +70,18 @@
       font-size: 17px;
       padding: 7px;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .gpt-name {
+      width: 20px;
+      height: 20px;
+      background-color: #43bbb0;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .copy {
@@ -186,10 +199,7 @@
       <div class="content" id="content"> </div>
 
       <div class="search-box">
-
-        <input type="checkbox" onchange='document.getElementById("history-tab").classList.toggle("nodisp");'>
         <input type="checkbox" onchange='document.getElementById("attrib").classList.toggle("nodisp");'><br>
-
         <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse,html code</textarea>
         <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
         <label for="toggle-checkbox" class="toggle-label"></label>
@@ -199,24 +209,30 @@
 
     <div id="attrib" class="nodisp">
       <input type="text" placeholder="token" id="token"><br>
-      <input type="text" placeholder="conversion id" id="cid"><br>
+      <input type="text" placeholder="conversation id" id="cid"><br>
       <select name="gpt" id="gpt" onchange="gpt = parseInt(this.value)">
-        <option value="1">OpenAI GPT</option>
-        <option value="2">Converse GPT</option>
+        <option value="0">OpenAI GPT</option>
+        <option value="1">Converse GPT</option>
+      </select>
+      <br>history tab:<input type="checkbox"
+        onchange='document.getElementById("history-tab").classList.toggle("nodisp");'>
+      <br>history delete:<input type="checkbox" onchange='localStorage.clear();window.location.reload()'>
+
     </div>
   </div>
 
 
   <script>
-    let gpt = 1;
+    let gpt = 0;
     let eventSource;
-    let conversionIdx = 0;
+    let conversationIdx = 0;
     let resp = '';
     let chatHistory = parse(localStorage.getItem("chatHistory"));
     chatHistory = chatHistory ? chatHistory : [];
     var query, token, cid;
     var conversation_id = "";
     var parent_message_id = "";
+    let gpts = ["O", "C"];
 
     (function showChatHistory(params) {
 
@@ -262,15 +278,15 @@
         return;
       }
 
-      createConversionBlock(++conversionIdx);
+      createConversionBlock(++conversationIdx);
       insertQuery(query);
       scrollToBottom("content");
 
-      document.querySelector(`#data_${conversionIdx}`).innerHTML = '<div class="blink_me">Processing...</div>';
-      if (gpt === 1) {
+      document.getElementById(`data_${conversationIdx}`).innerHTML = '<div class="blink_me">Processing...</div>';
+      if (gpt === 0) {
         console.log("openaiGPT");
         openaiGPT(query, token, cid);
-      } else if (gpt === 2) {
+      } else if (gpt === 1) {
         console.log("converseGPT");
         converseGPT(query);
       }
@@ -299,7 +315,7 @@
 
         } else {
           resp = p.message?.content?.parts.join();
-          document.querySelector(`#data_${conversionIdx}`).innerHTML = escapeHtml(resp);
+          document.querySelector(`#data_${conversationIdx}`).innerHTML = escapeHtml(resp);
 
         }
       });
@@ -312,19 +328,19 @@
         //console.log(e);
         scrollToBottom("content");
         if (i++ == 0)
-          document.querySelector(`#data_${conversionIdx}`).innerHTML = '';
+          document.querySelector(`#data_${conversationIdx}`).innerHTML = '';
 
         if (e.data.indexOf("DONE") > 0) {
 
-          conversation_id = 100;
-          parent_message_id = 200;
+          conversation_id = "";
+          parent_message_id = "";
           clickCB();
           addToHistory(q);
           markedSyntax();
         } else {
           let a = JSON.parse(e.data);
           resp = a.choices.map(a => a.delta.content).join();
-          document.querySelector(`#data_${conversionIdx}`).innerHTML += escapeHtml(resp);
+          document.querySelector(`#data_${conversationIdx}`).innerHTML += escapeHtml(resp);
         }
         //console.log(resp)
 
@@ -334,7 +350,7 @@
       //console.log("error stream");
       eventSource.addEventListener("error", (e) => {
         clickCB();
-        document.querySelector(`#data_${conversionIdx}`).innerHTML = "error";
+        document.querySelector(`#data_${conversationIdx}`).innerHTML = "error";
         console.log(e);
 
       });
@@ -342,7 +358,7 @@
     }
     function closeStream() {
       if (!eventSource) return;
-      console.log("closed stream");
+      //console.log("closed stream");
       eventSource.close();
       eventSource = null;
     }
@@ -359,7 +375,7 @@
       return null;
     }
     function markedSyntax(e) {
-      let id = `data_${conversionIdx}`;
+      let id = `data_${conversationIdx}`;
       const renderer = new marked.Renderer();
       renderer.code = (code, language) => {
         const lang = language && hljs.getLanguage(language);
@@ -369,7 +385,7 @@
       marked.setOptions({
         renderer: renderer
       });
-      document.getElementById(`conv_${conversionIdx}`).classList.toggle("whitespace-pre-wrap");
+      document.getElementById(`conv_${conversationIdx}`).classList.toggle("whitespace-pre-wrap");
       let rawText = document.getElementById(id).innerHTML;
       document.getElementById(id).innerHTML = marked.parse(htmlDecode(rawText));
 
@@ -406,12 +422,8 @@
 
     }
     function insertQuery(query) {
-      var newParagraph = createEl("h3");
-      newParagraph.textContent = query;
-      var targetElement = document.getElementById(`query_${conversionIdx}`);
-      //targetElement.appendChild(newParagraph);
-      targetElement.innerHTML = escapeHtml(query);
-
+      document.getElementById(`query_${conversationIdx}`).innerHTML =
+        `<strong class="gpt-name">${gpts[gpt]}</strong> ${escapeHtml(query)}`;
     }
     function createEl(el, id, className) {
       var elm = document.createElement(el);
