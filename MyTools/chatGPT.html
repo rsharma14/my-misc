@@ -50,7 +50,7 @@
       padding: 4px;
     }
 
-    .search-box {
+    .query-box {
       margin-top: 10px;
       display: flex;
       justify-content: center;
@@ -154,10 +154,28 @@
       content: "\27A4";
     }
 
-    @media screen and (max-width: 800px) {
+    @media screen and (min-width: 800px) {
       .history-tab {
-        display: none;
-        /* Hide left div on screens with width 500px or less */
+        display: block !important;
+      }
+    }
+
+    @media screen and (max-width: 800px) {
+
+      .query-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        left: 0px;
+      }
+
+      .content {
+        margin-bottom: 63px;
       }
     }
 
@@ -187,14 +205,14 @@
     }
 
     .nodisp {
-      display: none !important;
+      display: none;
     }
   </style>
 </head>
 
 <body>
   <div class="chat-container">
-    <div class="history-tab" id="history-tab" style="display: block;">
+    <div class="history-tab nodisp" id="history-tab">
       <h3 style="color: #0f0;text-align: center;">Chat History</h3>
       <hr>
       <div id="chatHistory"></div>
@@ -202,7 +220,7 @@
     <div class="content-container">
       <div class="content" id="content"> </div>
 
-      <div class="search-box">
+      <div class="query-box">
         <input type="checkbox" onchange='document.getElementById("attrib").classList.toggle("nodisp");'><br>
         <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse,html code</textarea>
         <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
