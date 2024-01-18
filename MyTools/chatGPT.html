@@ -175,7 +175,7 @@
       }
 
       .content {
-        margin-bottom: 60px;
+        margin-bottom: 55px;
       }
     }
 
@@ -222,7 +222,7 @@
 
       <div class="query-box">
         <input type="checkbox" onchange='document.getElementById("attrib").classList.toggle("nodisp");'><br>
-        <textarea rows="2" id="query" placeholder="Enter your query here...">java string reverse,html code</textarea>
+        <textarea rows="2" id="query" placeholder="Enter your query here..."></textarea>
         <input type="checkbox" id="toggle-checkbox" onchange="submitQuery(this)">
         <label for="toggle-checkbox" class="toggle-label"></label>
       </div>
@@ -447,6 +447,7 @@
     function insertQuery(query) {
       document.getElementById(`query_${conversationIdx}`).innerHTML =
         `<strong class="gpt-name">${gpts[gpt]}</strong> ${escapeHtml(query)}`;
+      document.getElementById(`query`).value = '';
     }
     function createEl(el, id, className) {
       var elm = document.createElement(el);
