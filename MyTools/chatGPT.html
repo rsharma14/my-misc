@@ -256,22 +256,29 @@
     var conversation_id = "";
     var parent_message_id = "";
     let gpts = ["O", "C"];
+    const PARENT_URL = "http://localhost:8080/gpt";
 
-    (function showChatHistory(params) {
+    (async function onAppLoad() {
 
       chatHistory.forEach(h => {
         addToHistoryDiv(h);
       });
 
-    })();
-
-    (function attachEvents() {
-      document.getElementById("query").addEventListener("keydown", function(event) {
+      document.getElementById("query").addEventListener("keydown", function (event) {
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
           clickCB();
         }
       });
+
+      await fetch(PARENT_URL)
+        .then(res => {
+          if (res.redirected) {
+            window.location.href = res.url.replace('rd','rd='+ encodeURIComponent(window.location.href));
+          }
+        }).catch(error => {
+          console.log('An error occurred:', error);
+        });
     })();
     function addToHistoryDiv(h) {
       var a = createEl("a", null, "nodec historyAnchor");
@@ -329,7 +336,7 @@
 
     function openaiGPT(q, t, c) {
 
-      eventSource = new EventSource(`https://merawork.in/api/backapp-service/gpt/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
+      eventSource = new EventSource(`${PARENT_URL}/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
       eventSource.addEventListener("message", (e) => {
         scrollToBottom("content");
 
@@ -354,7 +361,7 @@
     }
 
     function converseGPT(q) {
-      eventSource = new EventSource(`https://merawork.in/api/backapp-service/gpt/converse-gpt?q=${encodeURIComponent(q)}`);
+      eventSource = new EventSource(`${PARENT_URL}/gpt/converse-gpt?q=${encodeURIComponent(q)}`);
       let i = 0;
       eventSource.addEventListener("message", (e) => {
         //console.log(e);
