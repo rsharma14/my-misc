@@ -256,7 +256,8 @@
     var conversation_id = "";
     var parent_message_id = "";
     let gpts = ["O", "C"];
-    const PARENT_URL="https://merawork.in/api/backapp-service/gpt";
+    const PARENT_URL="https://merawork.in/api/backapp-service";
+    const loginUrl=`${PARENT_URL}/auth/v1/public/login`;
 
     (async function onAppLoad() {
 
@@ -271,10 +272,10 @@
         }
       });
 
-      await fetch(PARENT_URL)
+      await fetch(loginUrl)
         .then(res => {
-          if (res.redirected) {
-            window.location.href = res.url.replace('rd','rd='+ encodeURIComponent(window.location.href));
+          if (res.headers.get('code') === '401') {
+            window.location.href = loginUrl;//.replace('rd','rd='+ encodeURIComponent(window.location.href));
           }
         }).catch(error => {
           console.log('An error occurred:', error);
@@ -336,7 +337,7 @@
 
     function openaiGPT(q, t, c) {
 
-      eventSource = new EventSource(`${PARENT_URL}/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
+      eventSource = new EventSource(`${PARENT_URL}/gpt/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
       eventSource.addEventListener("message", (e) => {
         scrollToBottom("content");
 
