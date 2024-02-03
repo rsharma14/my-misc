@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MongoDB Query Builder with React</title>
+    <title>MongoDB Query Builder</title>
 
     <style>
         .column {
-            float: left;
-            width: 50%;
+            flex: 50%;
+            padding: 10px;
+            min-height: 300px;
         }
 
-        .row:after {
-            content: "";
-            display: table;
-            clear: both;
+        .row {
+            display: flex;
+
         }
     </style>
 </head>
@@ -132,16 +132,20 @@
                     document.execCommand("copy");
                 }
             }
-            
+
             return (
                 <div>
                     <h1 style={{ textAlign: "center", backgroundColor: "#108110" }}>MongoDB Query Builder</h1>
 
                     <div className="row">
-                        <div className="column">
-                            <textarea id="json" placeholder="Train Me for query key search"></textarea>
-                            <button onClick={addCondition}>&#10010;</button>
-                            <button onClick={generateQuery}>Generate Query</button>
+                        <div className="column" style={{ backgroundColor: "#aaa" }}>
+                            <div style={{ position: "relative", display: "flex" }}>
+                                <textarea id="json" placeholder="Train Me for query key search"></textarea>
+                                <div style={{ position: "absolute", right: "0px" }}>
+                                    <button onClick={addCondition}>&#10010;</button>
+
+                                </div>
+                            </div>
                             <hr />
                             {conditions.map((condition, index) => (
                                 <div key={index}>
@@ -167,11 +171,15 @@
                                 </div>
                             ))}
                         </div>
-                        <div className="column">
+                        <div className="column" style={{ backgroundColor: "#bbb" }}>
                             <div>
-                                <h2 style={{ display: "inline" }}>Generated MongoDB Query:</h2>
+                                <button onClick={generateQuery} style={{ float: "righta" }}>Generate Query</button>
+
+                                <h2 style={{ display: "inline" }}>Generated MongoDB Query</h2>
                                 <button type="button" id="copyProp" onClick={() => selectText('generatedQuery')}>Copy</button>
                             </div>
+                            <hr />
+
                             <pre id="generatedQuery" style={{ textWrap: "wrap" }}>{generatedQuery}</pre>
                         </div>
                     </div>
