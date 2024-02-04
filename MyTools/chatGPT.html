@@ -256,8 +256,8 @@
     var conversation_id = "";
     var parent_message_id = "";
     let gpts = ["O", "C"];
-    const PARENT_URL="https://merawork.in/api/backapp-service";
-    const loginUrl=`${PARENT_URL}/auth/v1/public/login`;
+    const PARENT_URL = "https://merawork.in/api/backapp-service";
+    const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
 
     (async function onAppLoad() {
 
@@ -335,6 +335,12 @@
 
     }
 
+    function onComplete(q) {
+      clickCB();
+      addToHistory(query);
+      markedSyntax();
+
+    }
     function openaiGPT(q, t, c) {
 
       eventSource = new EventSource(`${PARENT_URL}/gpt/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
@@ -348,11 +354,7 @@
         if (p.is_completion) {
           conversation_id = p.conversation_id;
           parent_message_id = p.id;
-
-          clickCB();
-          addToHistory(q);
-          markedSyntax();
-
+          onComplete();
         } else {
           resp = p.message?.content?.parts.join();
           document.querySelector(`#data_${conversationIdx}`).innerHTML = escapeHtml(resp);
@@ -371,12 +373,9 @@
           document.querySelector(`#data_${conversationIdx}`).innerHTML = '';
 
         if (e.data.indexOf("DONE") > 0) {
-
           conversation_id = "";
           parent_message_id = "";
-          clickCB();
-          addToHistory(q);
-          markedSyntax();
+          onComplete();
         } else {
           let a = JSON.parse(e.data);
           resp = a.choices.map(a => a.delta.content).join();
@@ -389,8 +388,8 @@
     function errorStream() {
       //console.log("error stream");
       eventSource.addEventListener("error", (e) => {
-        clickCB();
-        document.querySelector(`#data_${conversationIdx}`).innerHTML = "error";
+        onComplete();
+        document.querySelector(`#data_${conversationIdx}`).innerHTML += "error";
         console.log(e);
 
       });
