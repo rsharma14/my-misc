@@ -24,6 +24,7 @@
             padding: 5px;
             margin: 0 5px;
         }
+
         nav a:hover {
             background-color: #777;
         }
@@ -43,6 +44,25 @@
 
     </nav>
 
+    <script>
+        const PARENT_URL = "https://merawork.in/api/backapp-service";
+        const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
+
+        (async function () {
+            await fetch(loginUrl, {
+                method: 'GET',
+                credentials: 'include',
+            })
+                .then(res => {
+                    console.log(res.headers.get('code'));
+                    if (res.headers.get('code') === '401') {
+                        window.location.href = loginUrl;//.replace('rd','rd='+ encodeURIComponent(window.location.href));
+                    }
+                }).catch(error => {
+                    console.log('An error occurred:', error);
+                });
+        })();
+    </script>
 </body>
 
 </html>

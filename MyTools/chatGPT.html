@@ -274,14 +274,6 @@
         }
       });
 
-      await fetch(loginUrl)
-        .then(res => {
-          if (res.headers.get('code') === '401') {
-            window.location.href = loginUrl;//.replace('rd','rd='+ encodeURIComponent(window.location.href));
-          }
-        }).catch(error => {
-          console.log('An error occurred:', error);
-        });
     })();
     function addToHistoryDiv(h) {
       var a = createEl("a", null, "nodec historyAnchor");
