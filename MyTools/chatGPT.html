@@ -342,7 +342,7 @@
         scrollToBottom("content");
 
         let p = parse(e.data);
-        console.log(p)
+        //console.log(p)
         if (!p) return;
 
         if (p.is_completion) {
@@ -352,7 +352,8 @@
         } else {
           resp = p.message?.content?.parts.join();
           document.querySelector(`#data_${conversationIdx}`).innerHTML = escapeHtml(resp);
-
+          conversation_id = p.conversation_id;
+          parent_message_id = p.message.id;
         }
       });
     }
