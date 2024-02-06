@@ -49,18 +49,16 @@
         const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
 
         (async function () {
-            await fetch(loginUrl, {
-                method: 'GET',
-                credentials: 'include',
-            })
-                .then(res => {
-                    console.log(res.headers.get('code'));
-                    if (res.headers.get('code') === '401') {
-                        window.location.href = loginUrl;//.replace('rd','rd='+ encodeURIComponent(window.location.href));
-                    }
-                }).catch(error => {
-                    console.log('An error occurred:', error);
-                });
+            const xhttp = new XMLHttpRequest();
+            xhttp.onload = function () {
+                if (this.getResponseHeader('code') === '401') {
+                    window.location.href = loginUrl;//.replace('rd','rd='+ encodeURIComponent(window.location.href));
+                }
+
+            }
+            xhttp.open("GET", loginUrl);
+            xhttp.send();
+
         })();
     </script>
 </body>
