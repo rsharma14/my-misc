@@ -12,7 +12,11 @@ let gpts = ["O", "C"];
 const PARENT_URL = "https://merawork.in/api/backapp-service";
 const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
 
-document.onload = function () {
+document.addEventListener('DOMContentLoaded', function () {
+    onDocLoad();
+});
+
+function onDocLoad() {
 
     chatHistory.forEach(h => {
         addToHistoryDiv(h);
