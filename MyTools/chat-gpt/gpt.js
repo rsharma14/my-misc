@@ -12,7 +12,7 @@ let gpts = ["O", "C"];
 const PARENT_URL = "https://merawork.in/api/backapp-service";
 const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
 
-(async function onAppLoad() {
+document.onload = function () {
 
     chatHistory.forEach(h => {
         addToHistoryDiv(h);
@@ -24,8 +24,8 @@ const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
             clickCB();
         }
     });
+}
 
-})();
 function addToHistoryDiv(h) {
     var a = createEl("a", null, "nodec historyAnchor");
     a.href = "javascript:void(0)";
