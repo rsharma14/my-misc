@@ -71,16 +71,23 @@
 
 
     <script>
-        const PARENT_URL = "https://merawork.in/api/backapp-service";
+        const PARENT_URL = "http://localhost:8080/api/backapp-service";
         const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
-        const validateTokenUrl = `${PARENT_URL}/auth/v1/public/validate-token`;
+        const validateTokenUrl = `${PARENT_URL}/auth/v1/public/validate-token?a=1&b=2`;
 
         console.log(1);
         (async function () {
             const xhttp = new XMLHttpRequest();
             xhttp.onload = function () {
                 if (this.getResponseHeader('code') === '401') {
-                    window.parent.location.href = this.responseURL;//.replace('rd','rd='+ encodeURIComponent(window.location.href));
+                    let responseURL = this.responseURL;
+                    if (responseURL.indexOf("redirect_url=") > -1)
+                        responseURL = responseURL.substring(0, responseURL.indexOf("redirect_url=")) + 'redirect_url=' + window.location;
+                    else
+                        responseURL += '?redirect_url=' + window.location;
+
+
+                    window.parent.location.href = responseURL;
                 }
 
             }
