@@ -82,9 +82,9 @@
                 if (this.getResponseHeader('code') === '401') {
                     let responseURL = this.responseURL;
                     if (responseURL.indexOf("redirect_url=") > -1)
-                        responseURL = responseURL.substring(0, responseURL.indexOf("redirect_url=")) + 'redirect_url=' + window.location;
+                        responseURL = responseURL.substring(0, responseURL.indexOf("redirect_url=")) + 'redirect_url=' + window.parent.location;
                     else
-                        responseURL += '?redirect_url=' + window.location;
+                        responseURL += '?redirect_url=' + window.parent.location;
 
 
                     window.parent.location.href = responseURL;
