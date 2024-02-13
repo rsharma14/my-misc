@@ -53,19 +53,22 @@ function pickHistoryChat(e, q) {
 function clickCB() {
     document.getElementById("toggle-checkbox").click();
 }
-function submitQuery(e) {
+function submitQuery(e, qid, cb) {
 
-    if (!e.checked) {
+    if (e && !e.checked) {
         closeStream();
         return;
     }
-    query = document.getElementById("query").value;
+    query = document.getElementById(qid ? qid : "query").value;
     token = document.getElementById("token").value;
     cid = document.getElementById("cid").value;
     if (!query || query.trim().length <= 0) {
         clickCB();
         return;
     }
+
+    if (cb && typeof cb === "function")
+        cb();
 
     createConversionBlock(++conversationIdx);
     insertQuery(query);
@@ -199,9 +202,17 @@ function copyBlock(token) {
 function createConversionBlock(id) {
 
     var convDiv = createEl("div", "conv_" + id, "conversation whitespace-pre-wrap break-words");
-    var queryDiv = createEl("div", "query_" + id, "query");
+    var queryDiv = createEl("div", "querybox_" + id, "query");
     var dataDiv = createEl("div", "data_" + id, "conversation");
 
+    var editBtn = createEl("a", "edit_" + id, "nodec");
+    editBtn.href = "javascript:void(0)";
+    editBtn.onclick = function () { editQuery(this, id); };
+    editBtn.appendChild(document.createTextNode("Edit"));
+    editBtn.style.marginLeft = "auto";
+    editBtn.style.marginBottom = "auto";
+
+    queryDiv.appendChild(editBtn);
     convDiv.appendChild(queryDiv);
     convDiv.appendChild(dataDiv);
     convDiv.appendChild(createEl("hr"));
@@ -210,9 +221,53 @@ function createConversionBlock(id) {
     targetElement.appendChild(convDiv);
 
 }
+function editQuery(e, id) {
+
+    var editableDiv = document.getElementById(`query_` + id);
+    if (editableDiv.classList.contains('editMode')) return;
+    var content = editableDiv.innerHTML;
+
+    var inputField = createEl("textarea", `queryIp_` + id, null);
+    inputField.value = content;
+    inputField.rows = 3;
+
+    var submitButton = createEl("button");
+    submitButton.innerHTML = "&#10004;";
+    submitButton.onclick = function () {
+
+        let e = document.getElementById(`toggle-checkbox`);
+        if (e.checked)
+            clickCB();
+
+        e.checked = true;
+        submitQuery(e, `queryIp_${id}`, () => {
+            editableDiv.innerHTML = content;
+            editableDiv.classList.remove("editMode");
+        });
+
+    };
+
+    var cancelButton = createEl("button");
+    cancelButton.innerHTML = "&#10060;";
+    cancelButton.onclick = function () {
+        editableDiv.innerHTML = content;
+        editableDiv.classList.remove("editMode");
+    };
+
+    var buttonDiv = createEl("div");
+    buttonDiv.appendChild(submitButton);
+    buttonDiv.appendChild(cancelButton);
+
+    editableDiv.innerHTML = '';
+    editableDiv.appendChild(inputField);
+    editableDiv.appendChild(buttonDiv);
+
+    editableDiv.classList.add("editMode");
+}
+
 function insertQuery(query) {
-    document.getElementById(`query_${conversationIdx}`).innerHTML =
-        `<strong class="gpt-name">${gpts[gpt]}</strong> ${escapeHtml(query)}`;
+    document.getElementById(`querybox_${conversationIdx}`).insertAdjacentHTML("afterbegin",
+        `<strong class="gpt-name">${gpts[gpt]}&nbsp;</strong><sapn id=query_${conversationIdx}>${escapeHtml(query)}</span>`);
     document.getElementById(`query`).value = '';
 }
 function createEl(el, id, className) {
