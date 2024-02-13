@@ -198,12 +198,3 @@ textarea#query {
   display: none;
 }
 
-.editable {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-.editMode {
-  border: 1px solid #007bff;
-}

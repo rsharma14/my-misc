@@ -8,7 +8,7 @@ chatHistory = chatHistory ? chatHistory : [];
 var query, token, cid;
 var conversation_id = "";
 var parent_message_id = "";
-let gpts = ["O", "C"];
+let gpts = ["O", "B", "C"];
 const PARENT_URL = "https://merawork.in/api/backapp-service";
 const loginUrl = `${PARENT_URL}/auth/v1/public/login`;
 
@@ -76,10 +76,10 @@ function submitQuery(e, qid, cb) {
 
     document.getElementById(`data_${conversationIdx}`).innerHTML = '<div class="blink_me">Processing...</div>';
     if (gpt === 0) {
-        console.log("openaiGPT");
         openaiGPT(query, token, cid);
     } else if (gpt === 1) {
-        console.log("converseGPT");
+        bardGPT(query);
+    } else if (gpt === 2) {
         converseGPT(query);
     }
 
@@ -94,6 +94,7 @@ function onComplete(q) {
 
 }
 function openaiGPT(q, t, c) {
+    console.log("openaiGPT");
 
     eventSource = new EventSource(`${PARENT_URL}/gpt/openai-gpt?q=${encodeURIComponent(q)}&token=${t}&conversation_id=${conversation_id}&parent_message_id=${parent_message_id}`);
     eventSource.addEventListener("message", (e) => {
@@ -115,8 +116,14 @@ function openaiGPT(q, t, c) {
         }
     });
 }
+function bardGPT(q) {
+    console.log("bardGPT");
 
+    alert("bardGPT not implemented yet");
+}
 function converseGPT(q) {
+    console.log("converseGPT");
+
     eventSource = new EventSource(`${PARENT_URL}/gpt/converse-gpt?q=${encodeURIComponent(q)}`);
     let i = 0;
     eventSource.addEventListener("message", (e) => {
@@ -201,19 +208,19 @@ function copyBlock(token) {
 }
 function createConversionBlock(id) {
 
-    var convDiv = createEl("div", "conv_" + id, "conversation whitespace-pre-wrap break-words");
-    var queryDiv = createEl("div", "querybox_" + id, "query");
-    var dataDiv = createEl("div", "data_" + id, "conversation");
-
-    var editBtn = createEl("a", "edit_" + id, "nodec");
+    var editBtn = createEl("a", "edit_" + id, "nodec", { marginLeft: "auto", marginBottom: "auto" });
     editBtn.href = "javascript:void(0)";
     editBtn.onclick = function () { editQuery(this, id); };
-    editBtn.appendChild(document.createTextNode("Edit"));
-    editBtn.style.marginLeft = "auto";
-    editBtn.style.marginBottom = "auto";
+    let icon = createEl("i");
+    icon.innerHTML = "&#9998;";
+    editBtn.appendChild(icon);
 
+    var queryDiv = createEl("div", "querybox_" + id, "query");
     queryDiv.appendChild(editBtn);
+
+    var convDiv = createEl("div", "conv_" + id, "conversation whitespace-pre-wrap break-words");
     convDiv.appendChild(queryDiv);
+    var dataDiv = createEl("div", "data_" + id, "conversation");
     convDiv.appendChild(dataDiv);
     convDiv.appendChild(createEl("hr"));
 
@@ -227,9 +234,11 @@ function editQuery(e, id) {
     if (editableDiv.classList.contains('editMode')) return;
     var content = editableDiv.innerHTML;
 
-    var inputField = createEl("textarea", `queryIp_` + id, null);
+    var inputField = createEl("textarea", `queryIp_` + id, null, { width: "100%", resize: "vertical" });
+    inputField.onmousedown = function () {
+        inputField.style.height = (inputField.scrollHeight) + "px";
+    }
     inputField.value = content;
-    inputField.rows = 3;
 
     var submitButton = createEl("button");
     submitButton.innerHTML = "&#10004;";
@@ -254,7 +263,7 @@ function editQuery(e, id) {
         editableDiv.classList.remove("editMode");
     };
 
-    var buttonDiv = createEl("div");
+    var buttonDiv = createEl("div", null, null, { float: "right" });
     buttonDiv.appendChild(submitButton);
     buttonDiv.appendChild(cancelButton);
 
@@ -267,13 +276,16 @@ function editQuery(e, id) {
 
 function insertQuery(query) {
     document.getElementById(`querybox_${conversationIdx}`).insertAdjacentHTML("afterbegin",
-        `<strong class="gpt-name">${gpts[gpt]}&nbsp;</strong><sapn id=query_${conversationIdx}>${escapeHtml(query)}</span>`);
+        `<strong class="gpt-name" style="margin-left: auto;margin-bottom: auto;">${gpts[gpt]}</strong>
+       <sapn id=query_${conversationIdx} style='width:100%;margin-right: 12px;'>${escapeHtml(query)}</span>`);
     document.getElementById(`query`).value = '';
 }
-function createEl(el, id, className) {
+function createEl(el, id, className, style) {
     var elm = document.createElement(el);
     if (id) elm.id = id;
     if (className) elm.className = className;
+    if (style) Object.assign(elm.style, style);
+
 
     return elm;
 
